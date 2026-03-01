@@ -1,12 +1,12 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable } from "rxjs";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class ProfileService {
-  private apiUrl = 'http://localhost:3000/api/v1/users/me/profile';
+  private apiUrl = "http://localhost:3000/api/v1/users/me/profile";
   constructor(private http: HttpClient) {}
 
   getProfile(): Observable<any> {
@@ -20,11 +20,14 @@ export class ProfileService {
   }
 
   deleteProfile(): Observable<any> {
-    return this.http.delete(this.apiUrl, { withCredentials: true });
+    return this.http.delete(this.apiUrl, {
+      body: { confirm: true },
+      withCredentials: true,
+    });
   }
 
   logout(): void {
-    localStorage.removeItem('authToken');
-    window.location.href = '/login';
+    localStorage.removeItem("authToken");
+    window.location.href = "/login";
   }
 }

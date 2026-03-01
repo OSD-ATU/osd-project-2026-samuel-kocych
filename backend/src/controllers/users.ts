@@ -172,17 +172,6 @@ export const updateMyProfile = async (req: Request, res: Response) => {
     if (name) updateFields.name = name;
     if (email) updateFields.email = email.toLowerCase();
     if (password) {
-      if (!currentPassword) {
-        return res
-          .status(400)
-          .json({ message: "Current password required to change password" });
-      }
-      const isValid = await argon2.verify(user.password, currentPassword);
-      if (!isValid) {
-        return res
-          .status(401)
-          .json({ message: "Current password is incorrect" });
-      }
       updateFields.password = await argon2.hash(password, {
         type: argon2.argon2id,
       });
