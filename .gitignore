@@ -1,5 +1,5 @@
 # =========================
-# Node modules (common for backend & frontend)
+# Node modules
 # =========================
 **/node_modules/
 
@@ -15,17 +15,15 @@ yarn-error.log*
 # =========================
 # Build output / dist
 # =========================
-/backend/dist
-/frontend/dist
-/frontend/out-tsc
+**/dist
+**/out-tsc
 
 # =========================
 # Environment files
 # =========================
 *.env
 **/.env
-/src/environments/environment.ts
-/src/environments/environment.development.ts
+**/environments/
 
 # =========================
 # OS files
@@ -42,3 +40,9 @@ Thumbs.db
 *.ntvs*
 *.njsproj
 *.sln
+
+# =========================
+# Angular / TypeScript
+# =========================
+**/.angular/
+**/*.tsbuildinfo
