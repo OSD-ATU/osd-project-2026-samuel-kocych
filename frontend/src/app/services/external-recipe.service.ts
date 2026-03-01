@@ -1,35 +1,25 @@
-import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { catchError, map, shareReplay } from 'rxjs/operators';
-import { Recipe } from '../interfaces/recipe.interface';
-
-type MealDbMeal = {
-  idMeal: string;
-  strMeal: string;
-  strInstructions: string;
-  strMealThumb?: string;
-  [key: string]: any;
-};
-
-type MealDbMealSummary = {
-  idMeal: string;
-  strMeal: string;
-  strMealThumb?: string;
-};
+import { inject, Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable, of } from "rxjs";
+import { catchError, map, shareReplay } from "rxjs/operators";
+import { Recipe } from "../interfaces/recipe.interface";
+import {
+  MealDbMeal,
+  MealDbMealSummary,
+} from "../interfaces/external-recipe.interface";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class ExternalRecipeService {
   private http = inject(HttpClient);
 
-  private readonly baseUrl = 'https://www.themealdb.com/api/json/v1/1';
+  private readonly baseUrl = "https://www.themealdb.com/api/json/v1/1";
 
   private allRecipes$?: Observable<Recipe[]>;
 
   searchRecipes(search?: string): Observable<Recipe[]> {
-    const params: any = { s: (search ?? '').trim() };
+    const params: any = { s: (search ?? "").trim() };
 
     return this.http.get<any>(`${this.baseUrl}/search.php`, { params }).pipe(
       map((res) => {
@@ -41,7 +31,7 @@ export class ExternalRecipeService {
   }
 
   searchRecipesByFirstLetter(letter: string): Observable<Recipe[]> {
-    const normalized = (letter || '').trim().toLowerCase().slice(0, 1);
+    const normalized = (letter || "").trim().toLowerCase().slice(0, 1);
     if (!normalized || !/^[a-z]$/.test(normalized)) return of([]);
 
     const params: any = { f: normalized };
@@ -55,10 +45,10 @@ export class ExternalRecipeService {
   }
 
   filterByIngredient(ingredient: string): Observable<Recipe[]> {
-    const normalized = (ingredient || '').trim();
+    const normalized = (ingredient || "").trim();
     if (!normalized) return of([]);
 
-    const apiValue = normalized.replace(/\s+/g, '_');
+    const apiValue = normalized.replace(/\s+/g, "_");
     const params: any = { i: apiValue };
 
     return this.http.get<any>(`${this.baseUrl}/filter.php`, { params }).pipe(
@@ -71,7 +61,7 @@ export class ExternalRecipeService {
   }
 
   filterByCategory(category: string): Observable<Recipe[]> {
-    const normalized = (category || '').trim();
+    const normalized = (category || "").trim();
     if (!normalized) return of([]);
 
     const params: any = { c: normalized };
@@ -85,7 +75,7 @@ export class ExternalRecipeService {
   }
 
   filterByArea(area: string): Observable<Recipe[]> {
-    const normalized = (area || '').trim();
+    const normalized = (area || "").trim();
     if (!normalized) return of([]);
 
     const params: any = { a: normalized };
@@ -99,12 +89,12 @@ export class ExternalRecipeService {
   }
 
   listCategories(): Observable<string[]> {
-    const params: any = { c: 'list' };
+    const params: any = { c: "list" };
     return this.http.get<any>(`${this.baseUrl}/list.php`, { params }).pipe(
       map((res) => {
         const meals: Array<{ strCategory?: string }> = res?.meals || [];
         return meals
-          .map((m) => (m.strCategory || '').trim())
+          .map((m) => (m.strCategory || "").trim())
           .filter(Boolean)
           .sort((a, b) => a.localeCompare(b));
       }),
@@ -113,12 +103,12 @@ export class ExternalRecipeService {
   }
 
   listAreas(): Observable<string[]> {
-    const params: any = { a: 'list' };
+    const params: any = { a: "list" };
     return this.http.get<any>(`${this.baseUrl}/list.php`, { params }).pipe(
       map((res) => {
         const meals: Array<{ strArea?: string }> = res?.meals || [];
         return meals
-          .map((m) => (m.strArea || '').trim())
+          .map((m) => (m.strArea || "").trim())
           .filter(Boolean)
           .sort((a, b) => a.localeCompare(b));
       }),
@@ -130,7 +120,7 @@ export class ExternalRecipeService {
     if (this.allRecipes$) return this.allRecipes$;
 
     const letters = Array.from({ length: 26 }, (_, i) =>
-      String.fromCharCode('a'.charCodeAt(0) + i),
+      String.fromCharCode("a".charCodeAt(0) + i),
     );
 
     this.allRecipes$ = new Observable<Recipe[]>((subscriber) => {
@@ -177,10 +167,10 @@ export class ExternalRecipeService {
     category?: string;
     area?: string;
   }): Observable<Recipe[]> {
-    const search = (params.search || '').trim();
-    const ingredient = (params.ingredient || '').trim();
-    const category = (params.category || '').trim();
-    const area = (params.area || '').trim();
+    const search = (params.search || "").trim();
+    const ingredient = (params.ingredient || "").trim();
+    const category = (params.category || "").trim();
+    const area = (params.area || "").trim();
 
     if (ingredient) return this.filterByIngredient(ingredient);
     if (category) return this.filterByCategory(category);
@@ -194,7 +184,7 @@ export class ExternalRecipeService {
     return this.http.get<any>(`${this.baseUrl}/lookup.php`, { params }).pipe(
       map((res) => {
         const meal: MealDbMeal | undefined = res?.meals?.[0];
-        if (!meal) throw new Error('recipe not found');
+        if (!meal) throw new Error("recipe not found");
         return this.mapMealToRecipe(meal);
       }),
     );
@@ -204,7 +194,7 @@ export class ExternalRecipeService {
     return this.http.get<any>(`${this.baseUrl}/random.php`).pipe(
       map((res) => {
         const meal: MealDbMeal | undefined = res?.meals?.[0];
-        if (!meal) throw new Error('recipe not found');
+        if (!meal) throw new Error("recipe not found");
         return this.mapMealToRecipe(meal);
       }),
     );
@@ -222,7 +212,7 @@ export class ExternalRecipeService {
       instructions: m.strInstructions,
       image: m.strMealThumb,
       dateCreated: new Date(),
-      difficulty: 'easy',
+      difficulty: "easy",
     };
   }
 
@@ -231,10 +221,10 @@ export class ExternalRecipeService {
       _id: m.idMeal,
       title: m.strMeal,
       ingredients: [],
-      instructions: '',
+      instructions: "",
       image: m.strMealThumb,
       dateCreated: new Date(),
-      difficulty: 'easy',
+      difficulty: "easy",
     };
   }
 }
