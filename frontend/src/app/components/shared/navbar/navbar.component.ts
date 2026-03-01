@@ -32,6 +32,8 @@ export class NavbarComponent {
     map((user) => user?.role === 'admin' || user?.role === 'editor')
   );
 
+  isAdmin$ = this.authService.isAdmin$;
+
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);

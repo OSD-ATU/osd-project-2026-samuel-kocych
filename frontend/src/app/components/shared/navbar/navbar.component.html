@@ -33,6 +33,14 @@
       <a mat-button routerLink="/favourites" routerLinkActive="mat-accent"
         >Favourites</a
       >
+      
+      @if (isAdmin$ | async) {
+        <a mat-button routerLink="/admin" routerLinkActive="mat-accent">
+          <mat-icon>admin_panel_settings</mat-icon>
+          Admin
+        </a>
+      }
+      
       <a
         mat-icon-button
         routerLink="/profile"
@@ -89,6 +97,12 @@
     >
       Favourites
     </button>
+
+    @if (isAdmin$ | async) {
+      <button mat-menu-item routerLink="/admin" routerLinkActive="mat-accent">
+        <mat-icon>admin_panel_settings</mat-icon> Admin Panel
+      </button>
+    }
 
     <button mat-menu-item routerLink="/profile" routerLinkActive="mat-accent">
       <mat-icon>account_circle</mat-icon> Profile
