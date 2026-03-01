@@ -13,6 +13,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-admin',
@@ -35,8 +37,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   styleUrl: './admin.component.scss',
 })
 export class AdminComponent implements OnInit {
-  adminService = inject(AdminService);
-  snackBar = inject(MatSnackBar);
+  private adminService = inject(AdminService);
+  private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
   
   users: User[] = [];
   loading = false;
@@ -51,13 +54,12 @@ export class AdminComponent implements OnInit {
     this.adminService.getAllUsers().subscribe({
       next: (res) => {
         this.users = res.users;
-        this.loading = false;
-        this.snackBar.open('Users loaded successfully', 'Close', { duration: 2000 });
+        this.showSnackBar('Users loaded successfully', 'success');
       },
       error: (err) => {
         console.error(err);
         this.loading = false;
-        this.snackBar.open('Failed to load users', 'Close', { duration: 3000 });
+        this.showSnackBar('Failed to load users', 'error');
       },
     });
   }
@@ -66,28 +68,47 @@ export class AdminComponent implements OnInit {
     this.adminService.updateUserRole(userId, newRole).subscribe({
       next: () => {
         this.loadUsers();
-        this.snackBar.open(`Role updated for ${userName}`, 'Close', { duration: 2000 });
+        this.showSnackBar(`Role updated for ${userName}`, 'success');
       },
       error: (err) => {
         console.error(err);
-        this.snackBar.open('Failed to update role', 'Close', { duration: 3000 });
+        this.showSnackBar('Failed to update role', 'error');
       }
     });
   }
 
   deleteUser(userId: string, userName: string) {
-    if (confirm(`Delete user "${userName}"? This action cannot be undone!`)) {
-      this.adminService.deleteUser(userId).subscribe({
-        next: () => {
-          this.loadUsers();
-          this.snackBar.open(`User ${userName} deleted`, 'Close', { duration: 2000 });
-        },
-        error: (err) => {
-          console.error(err);
-          this.snackBar.open('Failed to delete user', 'Close', { duration: 3000 });
-        }
-      });
-    }
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: {
+        title: 'Delete User',
+        message: `Delete user "${userName}"? This action cannot be undone!`,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.adminService.deleteUser(userId).subscribe({
+          next: () => {
+            this.loadUsers();
+            this.showSnackBar(`User ${userName} deleted`, 'success');
+          },
+          error: (err) => {
+            console.error(err);
+            this.showSnackBar('Failed to delete user', 'error');
+          }
+        });
+      }
+    });
+  }
+
+  private showSnackBar(message: string, type: 'success' | 'error'): void {
+    this.snackBar.open(message, type === 'success' ? 'OK' : 'Dismiss', {
+      duration: type === 'success' ? 3500 : 8000,
+      panelClass: [`${type}-snackbar`],
+      horizontalPosition: 'end',
+      verticalPosition: 'bottom',
+    });
   }
 
   getRoleBadgeColor(role?: 'admin' | 'editor' | ''): string {

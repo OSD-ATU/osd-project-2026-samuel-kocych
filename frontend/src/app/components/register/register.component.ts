@@ -1,22 +1,22 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject } from "@angular/core";
 import {
   FormGroup,
   FormBuilder,
   Validators,
   FormsModule,
   ReactiveFormsModule,
-} from '@angular/forms';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatInputModule } from '@angular/material/input';
-import { AuthCustomService } from '../../services/auth-custom.service';
-import { Router, RouterLink } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { CommonModule } from '@angular/common';
+} from "@angular/forms";
+import { MatSnackBar, MatSnackBarModule } from "@angular/material/snack-bar";
+import { MatInputModule } from "@angular/material/input";
+import { AuthCustomService } from "../../services/auth-custom.service";
+import { Router, RouterLink } from "@angular/router";
+import { MatButtonModule } from "@angular/material/button";
+import { MatCardModule } from "@angular/material/card";
+import { MatIconModule } from "@angular/material/icon";
+import { CommonModule } from "@angular/common";
 
 @Component({
-  selector: 'app-register',
+  selector: "app-register",
   standalone: true,
   imports: [
     CommonModule,
@@ -28,8 +28,8 @@ import { CommonModule } from '@angular/common';
     MatCardModule,
     MatIconModule,
   ],
-  templateUrl: './register.component.html',
-  styleUrl: './register.component.scss',
+  templateUrl: "./register.component.html",
+  styleUrl: "./register.component.scss",
 })
 export class RegisterComponent {
   registerForm: FormGroup;
@@ -42,57 +42,49 @@ export class RegisterComponent {
   constructor() {
     this.registerForm = this.fb.group(
       {
-        name: ['', Validators.required],
-        email: ['', [Validators.required, Validators.email]],
-        password: ['', [Validators.required, Validators.minLength(6)]],
-        confirmPassword: ['', Validators.required],
-        role: [''],
+        name: ["", Validators.required],
+        email: ["", [Validators.required, Validators.email]],
+        password: ["", [Validators.required, Validators.minLength(6)]],
+        confirmPassword: ["", Validators.required],
+        role: [""],
       },
-      { validators: this.passwordsMatchValidator }
+      { validators: this.passwordsMatchValidator },
     );
   }
 
   passwordsMatchValidator(form: FormGroup) {
-    const password = form.get('password')?.value;
-    const confirmPassword = form.get('confirmPassword')?.value;
+    const password = form.get("password")?.value;
+    const confirmPassword = form.get("confirmPassword")?.value;
     return password === confirmPassword ? null : { passwordsMismatch: true };
   }
 
   onSubmit() {
     if (this.registerForm.invalid) {
-      this.snackBar.open('Please fix errors before submitting.', 'Dismiss', {
-        duration: 4000,
-        horizontalPosition: 'end',
-        verticalPosition: 'bottom',
-      });
+      this.showSnackBar("Please fix errors before submitting.", "error");
       return;
     }
     const { name, email, password, role } = this.registerForm.value;
     this.authService.register(name, email, password, role).subscribe({
       next: (res) => {
-        this.snackBar.open(
-          'Registered successfully! Please login.',
-          'Dismiss',
-          {
-            duration: 5000,
-            horizontalPosition: 'end',
-            verticalPosition: 'bottom',
-          }
-        );
-        this.router.navigate(['/login']);
+        this.showSnackBar("Registered successfully! Please login.", "success");
+        this.router.navigate(["/login"]);
       },
       error: (err) => {
-        this.snackBar.open(
-          'Registration failed. Email may already exist.',
-          'Dismiss',
-          {
-            duration: 5000,
-            horizontalPosition: 'end',
-            verticalPosition: 'bottom',
-          }
+        this.showSnackBar(
+          "Registration failed. Email may already exist.",
+          "error",
         );
         console.error(err);
       },
+    });
+  }
+
+  private showSnackBar(message: string, type: "success" | "error"): void {
+    this.snackBar.open(message, type === "success" ? "OK" : "Dismiss", {
+      duration: type === "success" ? 3500 : 8000,
+      panelClass: [`${type}-snackbar`],
+      horizontalPosition: "end",
+      verticalPosition: "bottom",
     });
   }
 
@@ -101,10 +93,10 @@ export class RegisterComponent {
   hideConfirm = true;
 
   navigateRegister() {
-    this.router.navigate(['/register']);
+    this.router.navigate(["/register"]);
   }
 
   navigateLogin() {
-    this.router.navigate(['/login']);
+    this.router.navigate(["/login"]);
   }
 }
