@@ -27,7 +27,8 @@ export class ProfileService {
   }
 
   logout(): void {
-    localStorage.removeItem("authToken");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     window.location.href = "/login";
   }
 }
