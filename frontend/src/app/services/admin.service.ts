@@ -9,14 +9,14 @@ import { environment } from "../../environments/environment.development";
 })
 export class AdminService {
   private http = inject(HttpClient);
-  private baseUrl = `${environment.apiUri}/users/admin`;
+  private baseUrl = environment.lambdaUri;
 
   getAllUsers(): Observable<{ users: User[] }> {
     return this.http.get<{ users: User[] }>(`${this.baseUrl}/users`);
   }
 
   updateUserRole(userId: string, role: string): Observable<any> {
-    return this.http.put(`${this.baseUrl}/users/${userId}/role`, { role });
+    return this.http.patch(`${this.baseUrl}/users/${userId}`, { role });
   }
 
   deleteUser(userId: string): Observable<any> {
