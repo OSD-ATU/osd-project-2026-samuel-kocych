@@ -1,20 +1,13 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, of } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { AuthCustomService } from './auth-custom.service';
-import { environment } from '../../environments/environment.development';
-
-export type FavoriteSource = 'external' | 'internal';
-
-export interface FavoriteRecipeItem {
-  id: string;
-  source: FavoriteSource;
-  image?: string;
-}
+import { Injectable, inject } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { BehaviorSubject, of } from "rxjs";
+import { map } from "rxjs/operators";
+import { AuthCustomService } from "./auth-custom.service";
+import { environment } from "../../environments/environment.development";
+import { FavoriteItem } from "../interfaces/user.interface";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class FavoritesService {
   private http = inject(HttpClient);
@@ -22,21 +15,19 @@ export class FavoritesService {
 
   private apiUrl = `${environment.apiUri}/users/me/favorites`;
 
-  private readonly favoritesSubject = new BehaviorSubject<FavoriteRecipeItem[]>(
-    [],
-  );
+  private readonly favoritesSubject = new BehaviorSubject<FavoriteItem[]>([]);
 
   readonly favoriteItems$ = this.favoritesSubject.asObservable();
 
   readonly favoriteExternalIds$ = this.favoriteItems$.pipe(
     map((items) =>
-      items.filter((x) => x.source === 'external').map((x) => x.id),
+      items.filter((x) => x.source === "external").map((x) => x.id),
     ),
   );
 
   readonly favoriteInternalIds$ = this.favoriteItems$.pipe(
     map((items) =>
-      items.filter((x) => x.source === 'internal').map((x) => x.id),
+      items.filter((x) => x.source === "internal").map((x) => x.id),
     ),
   );
 
@@ -72,7 +63,10 @@ export class FavoritesService {
     return this.favoritesSubject.value.map((x) => x.id);
   }
 
-  isFavorite(id?: string | null, source: FavoriteSource = 'external'): boolean {
+  isFavorite(
+    id?: string | null,
+    source: "internal" | "external" = "external",
+  ): boolean {
     if (!id) return false;
     const trimmed = id.trim();
     return this.favoritesSubject.value.some(
@@ -82,9 +76,9 @@ export class FavoritesService {
 
   getImage(
     id?: string | null,
-    source: FavoriteSource = 'external',
+    source: "internal" | "external" = "external",
   ): string | undefined {
-    const trimmed = (id || '').trim();
+    const trimmed = (id || "").trim();
     if (!trimmed) return undefined;
     return this.favoritesSubject.value.find(
       (x) => x.id === trimmed && x.source === source,
@@ -93,15 +87,15 @@ export class FavoritesService {
 
   add(
     id: string,
-    source: FavoriteSource = 'external',
+    source: "internal" | "external" = "external",
     image?: string | null,
   ): void {
     if (!this.authService.isAuthenticated$.value) return;
 
-    const trimmed = (id || '').trim();
+    const trimmed = (id || "").trim();
     if (!trimmed) return;
 
-    const nextImage = (image || '').trim() || undefined;
+    const nextImage = (image || "").trim() || undefined;
     const existing = this.favoritesSubject.value.find(
       (x) => x.id === trimmed && x.source === source,
     );
@@ -145,10 +139,10 @@ export class FavoritesService {
       });
   }
 
-  remove(id: string, source: FavoriteSource = 'external'): void {
+  remove(id: string, source: "internal" | "external" = "external"): void {
     if (!this.authService.isAuthenticated$.value) return;
 
-    const trimmed = (id || '').trim();
+    const trimmed = (id || "").trim();
     if (!trimmed) return;
 
     const optimistic = this.favoritesSubject.value.filter(
@@ -168,10 +162,10 @@ export class FavoritesService {
 
   toggle(
     id?: string | null,
-    source: FavoriteSource = 'external',
+    source: "internal" | "external" = "external",
     image?: string | null,
   ): void {
-    const trimmed = (id || '').trim();
+    const trimmed = (id || "").trim();
     if (!trimmed) return;
 
     if (!this.authService.isAuthenticated$.value) return;
@@ -180,7 +174,7 @@ export class FavoritesService {
     else this.add(trimmed, source, image);
   }
 
-  private static normalizeResponse(res: unknown): FavoriteRecipeItem[] {
+  private static normalizeResponse(res: unknown): FavoriteItem[] {
     const anyRes: any = res;
     const candidates = Array.isArray(anyRes)
       ? anyRes
@@ -190,16 +184,16 @@ export class FavoritesService {
 
     return candidates
       .map((x: any) => {
-        const id = typeof x?.id === 'string' ? x.id.trim() : '';
-        const source: FavoriteSource =
-          x?.source === 'internal' ? 'internal' : 'external';
-        const image = typeof x?.image === 'string' ? x.image.trim() : '';
+        const id = typeof x?.id === "string" ? x.id.trim() : "";
+        const source: "internal" | "external" =
+          x?.source === "internal" ? "internal" : "external";
+        const image = typeof x?.image === "string" ? x.image.trim() : "";
         return {
           id,
           source,
           image: image || undefined,
-        } as FavoriteRecipeItem;
+        } as FavoriteItem;
       })
-      .filter((x: FavoriteRecipeItem) => !!x.id);
+      .filter((x: FavoriteItem) => !!x.id);
   }
 }

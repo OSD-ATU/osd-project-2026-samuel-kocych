@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { z } from "zod";
+import { FavoriteItem } from "./favorite";
 
 export interface User {
   _id?: ObjectId;
@@ -9,13 +10,6 @@ export interface User {
   dateJoined: Date;
   role: Role;
   favorites: FavoriteItem[];
-}
-
-export interface FavoriteItem {
-  id: string;
-  source: "internal" | "external";
-  image?: string;
-  addedAt: Date;
 }
 
 export enum Role {
