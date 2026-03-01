@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "ES2024",
+    "module": "CommonJS",
+    "outDir": "./build",
+    "rootDir": ".",
+    "strict": true,
+    "esModuleInterop": true
+  },
+  "include": ["src/**/*", "tests/**/*", "tests", "server.ts"]
+}

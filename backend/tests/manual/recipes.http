@@ -1,0 +1,291 @@
+@baseUrl = http://localhost:3000/api/v1
+@adminEmail = admin@example.com
+@editorEmail = editor@example.com
+@userEmail = user@example.com
+@password = password
+
+### register admin
+# @name registerAdmin
+POST {{baseUrl}}/auth/register
+content-type: application/json
+
+{
+  "name": "admin user",
+  "email": "{{adminEmail}}",
+  "password": "{{password}}",
+  "role": "admin"
+}
+
+### register editor
+# @name registerEditor
+POST {{baseUrl}}/auth/register
+content-type: application/json
+
+{
+  "name": "editor user",
+  "email": "{{editorEmail}}",
+  "password": "{{password}}",
+  "role": "editor"
+}
+
+### register regular user
+# @name registerUser
+POST {{baseUrl}}/auth/register
+content-type: application/json
+
+{
+  "name": "normal user",
+  "email": "{{userEmail}}",
+  "password": "{{password}}",
+  "role": ""
+}
+
+### login admin
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+content-type: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "password": "{{password}}"
+}
+
+### save admin token
+@adminToken = {{loginAdmin.response.body.token}}
+
+### login editor
+# @name loginEditor
+POST {{baseUrl}}/auth/login
+content-type: application/json
+
+{
+  "email": "{{editorEmail}}",
+  "password": "{{password}}"
+}
+
+### save editor token
+@editorToken = {{loginEditor.response.body.token}}
+
+### login user
+# @name loginUser
+POST {{baseUrl}}/auth/login
+content-type: application/json
+
+{
+  "email": "{{userEmail}}",
+  "password": "{{password}}"
+}
+
+### save user token
+@userToken = {{loginUser.response.body.token}}
+
+### admin creates recipe
+# @name createRecipeAdmin
+POST {{baseUrl}}/recipes
+content-type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "title": "chocolate cake",
+  "ingredients": ["flour", "sugar", "cocoa powder", "eggs"],
+  "instructions": "mix and bake for 30 minutes",
+  "difficulty": "medium"
+}
+
+### save recipe id
+@recipeId = {{createRecipeAdmin.response.headers.location}}
+
+### editor creates recipe
+# @name createRecipeEditor
+POST {{baseUrl}}/recipes
+content-type: application/json
+Authorization: Bearer {{editorToken}}
+
+{
+  "title": "banana bread",
+  "ingredients": ["banana", "flour", "sugar", "eggs"],
+  "instructions": "mix and bake 40 minutes",
+  "difficulty": "easy"
+}
+
+### save editor recipe id
+@editorRecipeId = {{createRecipeEditor.response.headers.location}}
+
+### user tries to create recipe (should fail)
+# @name createRecipeUser
+POST {{baseUrl}}/recipes
+content-type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "title": "apple pie",
+  "ingredients": ["apple", "flour", "sugar", "butter"],
+  "instructions": "mix and bake 30 minutes",
+  "difficulty": "medium"
+}
+
+### get all recipes
+GET {{baseUrl}}/recipes
+Authorization: Bearer {{adminToken}}
+
+### get recipe by id
+GET {{baseUrl}}/recipes/{{recipeId}}
+Authorization: Bearer {{adminToken}}
+
+### add comment to recipe as admin
+# @name addCommentAdmin
+POST {{baseUrl}}/recipes/{{recipeId}}/comments
+content-type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "user": "admin user",
+  "text": "this is a great recipe"
+}
+
+### save comment id
+@commentId = {{addCommentAdmin.response.headers.location}}
+
+### add comment to admin recipe as editor (should fail 403)
+# @name addCommentEditor
+POST {{baseUrl}}/recipes/{{recipeId}}/comments
+content-type: application/json
+Authorization: Bearer {{editorToken}}
+
+{
+  "user": "editor user",
+  "text": "i like this recipe"
+}
+
+### get all comments for recipe
+GET {{baseUrl}}/recipes/{{recipeId}}/comments
+Authorization: Bearer {{adminToken}}
+
+### update own editor recipe as editor
+PUT {{baseUrl}}/recipes/{{editorRecipeId}}
+content-type: application/json
+Authorization: Bearer {{editorToken}}
+
+{
+  "title": "updated banana bread",
+  "instructions": "mix and bake for 35 minutes"
+}
+
+### user adds external favorite
+POST {{baseUrl}}/users/me/favorites
+content-type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "id": "ext-123",
+  "source": "external",
+  "image": "https://example.com/img.jpg"
+}
+
+### user gets favorites
+GET {{baseUrl}}/users/me/favorites
+Authorization: Bearer {{userToken}}
+
+### user deletes external favorite
+DELETE {{baseUrl}}/users/me/favorites/external/ext-123
+Authorization: Bearer {{userToken}}
+
+### delete comment as admin
+DELETE {{baseUrl}}/recipes/{{recipeId}}/comments/{{commentId}}
+Authorization: Bearer {{adminToken}}
+
+### pagination, search, filter examples
+GET {{baseUrl}}/recipes?page=1&limit=1
+Authorization: Bearer {{adminToken}}
+
+### search recipes by title
+GET {{baseUrl}}/recipes?search=banana
+Authorization: Bearer {{adminToken}}
+
+### filter recipes by ingredient
+GET {{baseUrl}}/recipes?ingredient=flour
+Authorization: Bearer {{adminToken}}
+
+### filter recipes by difficulty
+GET {{baseUrl}}/recipes?difficulty=medium
+Authorization: Bearer {{adminToken}}
+
+### sort recipes ascending by date
+GET {{baseUrl}}/recipes?sort=dateCreated&order=asc
+Authorization: Bearer {{adminToken}}
+
+### sort recipes descending by date
+GET {{baseUrl}}/recipes?sort=dateCreated&order=desc
+Authorization: Bearer {{adminToken}}
+
+### get random recipe
+GET {{baseUrl}}/recipes/random
+Authorization: Bearer {{adminToken}}
+
+### get recipe count
+GET {{baseUrl}}/recipes/count
+Authorization: Bearer {{adminToken}}
+
+### failure case: empty title
+POST {{baseUrl}}/recipes
+content-type: application/json
+Authorization: Bearer {{editorToken}}
+
+{
+  "title": "",
+  "ingredients": ["egg"],
+  "instructions": "mix"
+}
+
+### failure case: missing instructions
+POST {{baseUrl}}/recipes
+content-type: application/json
+Authorization: Bearer {{editorToken}}
+
+{
+  "title": "no instructions",
+  "ingredients": ["egg"],
+  "instructions": ""
+}
+
+### failure case: missing user in comment
+POST {{baseUrl}}/recipes/{{recipeId}}/comments
+content-type: application/json
+Authorization: Bearer {{editorToken}}
+
+{
+  "user": "",
+  "text": "missing user"
+}
+
+### failure case: missing text in comment
+POST {{baseUrl}}/recipes/{{recipeId}}/comments
+content-type: application/json
+Authorization: Bearer {{editorToken}}
+
+{
+  "user": "john",
+  "text": ""
+}
+
+### failure case: empty title update
+PUT {{baseUrl}}/recipes/{{recipeId}}
+content-type: application/json
+Authorization: Bearer {{editorToken}}
+
+{
+  "title": ""
+}
+
+### failure case: update non-existent recipe
+PUT {{baseUrl}}/recipes/64b64c4f0000000000000000
+content-type: application/json
+Authorization: Bearer {{editorToken}}
+
+{
+  "title": "does not exist"
+}
+
+### failure case: delete non-existent recipe
+DELETE {{baseUrl}}/recipes/64b64c4f0000000000000000
+Authorization: Bearer {{adminToken}}

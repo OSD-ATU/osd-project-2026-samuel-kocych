@@ -1,0 +1,363 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Recipe App API",
+    "version": "1.0.0",
+    "description": "REST API for managing recipes and comments."
+  },
+  "servers": [{ "url": "http://localhost:3000/api" }],
+  "paths": {
+    "/recipes": {
+      "get": {
+        "summary": "Get all recipes",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search by recipe title",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "ingredient",
+            "in": "query",
+            "description": "Filter by ingredient",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "difficulty",
+            "in": "query",
+            "description": "Filter by difficulty (easy, medium, hard)",
+            "schema": { "type": "string", "enum": ["easy", "medium", "hard"] }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Field to sort by (title, dateCreated, difficulty)",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "description": "Sort order (asc, desc)",
+            "schema": { "type": "string", "enum": ["asc", "desc"] }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of recipes per page",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of recipes",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/RecipeList" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new recipe",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RecipeInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Recipe created" },
+          "400": { "description": "Validation failed" }
+        }
+      }
+    },
+    "/recipes/{id}": {
+      "get": {
+        "summary": "Get recipe by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recipe found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Recipe" }
+              }
+            }
+          },
+          "404": { "description": "Recipe not found" }
+        }
+      },
+      "put": {
+        "summary": "Update recipe by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RecipeInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Recipe updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Recipe" }
+              }
+            }
+          },
+          "400": { "description": "Validation failed" },
+          "404": { "description": "Recipe not found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete recipe by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Recipe deleted" },
+          "404": { "description": "Recipe not found" }
+        }
+      }
+    },
+    "/recipes/random": {
+      "get": {
+        "summary": "Get a random recipe",
+        "responses": {
+          "200": {
+            "description": "Random recipe",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Recipe" }
+              }
+            }
+          },
+          "404": { "description": "No recipes found" }
+        }
+      }
+    },
+    "/recipes/count": {
+      "get": {
+        "summary": "Get total number of recipes",
+        "responses": {
+          "200": {
+            "description": "Recipe count",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "totalRecipes": { "type": "integer" } }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/recipes/{recipeId}/comments": {
+      "get": {
+        "summary": "Get all comments for a recipe",
+        "parameters": [
+          {
+            "name": "recipeId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of comments",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CommentList" }
+              }
+            }
+          },
+          "404": { "description": "Recipe not found" }
+        }
+      },
+      "post": {
+        "summary": "Add a comment to a recipe",
+        "parameters": [
+          {
+            "name": "recipeId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CommentInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Comment added" },
+          "400": { "description": "Validation failed" },
+          "404": { "description": "Recipe not found" }
+        }
+      }
+    },
+    "/recipes/{recipeId}/comments/{commentId}": {
+      "put": {
+        "summary": "Update a comment",
+        "parameters": [
+          {
+            "name": "recipeId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "commentId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CommentInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Comment updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Comment" }
+              }
+            }
+          },
+          "400": { "description": "Validation failed" },
+          "404": { "description": "Recipe or comment not found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete a comment",
+        "parameters": [
+          {
+            "name": "recipeId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "commentId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Comment deleted" },
+          "404": { "description": "Recipe or comment not found" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Recipe": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "title": { "type": "string" },
+          "ingredients": { "type": "array", "items": { "type": "string" } },
+          "instructions": { "type": "string" },
+          "difficulty": {
+            "type": "string",
+            "enum": ["easy", "medium", "hard"]
+          },
+          "comments": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Comment" }
+          },
+          "dateCreated": { "type": "string", "format": "date-time" },
+          "dateUpdated": { "type": "string", "format": "date-time" }
+        }
+      },
+      "RecipeInput": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "ingredients": { "type": "array", "items": { "type": "string" } },
+          "instructions": { "type": "string" },
+          "difficulty": { "type": "string", "enum": ["easy", "medium", "hard"] }
+        },
+        "required": ["title", "ingredients", "instructions"]
+      },
+      "RecipeList": {
+        "type": "object",
+        "properties": {
+          "total": { "type": "integer" },
+          "page": { "type": "integer" },
+          "recipes": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Recipe" }
+          }
+        }
+      },
+      "Comment": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "user": { "type": "string" },
+          "text": { "type": "string" },
+          "dateCreated": { "type": "string", "format": "date-time" },
+          "dateUpdated": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CommentInput": {
+        "type": "object",
+        "properties": {
+          "user": { "type": "string" },
+          "text": { "type": "string" }
+        },
+        "required": ["user", "text"]
+      },
+      "CommentList": {
+        "type": "array",
+        "items": { "$ref": "#/components/schemas/Comment" }
+      }
+    }
+  }
+}
