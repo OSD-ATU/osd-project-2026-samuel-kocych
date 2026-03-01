@@ -3,6 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { User } from '../interfaces/user.interface';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root',
@@ -63,7 +64,7 @@ export class AuthCustomService {
   login(email: string, password: string) {
     return this.http
       .post<{ user: User; token: string }>(
-        'http://localhost:3000/api/v1/auth/login',
+        `${environment.apiUri}/auth/login`,
         {
           email,
           password,
