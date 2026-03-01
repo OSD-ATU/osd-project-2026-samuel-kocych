@@ -1,0 +1,13 @@
+<!-- dialog title -->
+<h1 mat-dialog-title>{{ title }}</h1>
+
+<!-- dialog message content -->
+<div mat-dialog-content>
+  <p>{{ message }}</p>
+</div>
+
+<!-- action buttons aligned to end -->
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="onDismiss()">No</button>
+  <button mat-raised-button color="primary" (click)="onConfirm()">Yes</button>
+</div>

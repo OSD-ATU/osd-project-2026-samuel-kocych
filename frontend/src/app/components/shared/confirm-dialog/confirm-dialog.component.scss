@@ -1,0 +1,27 @@
+// customize dialog title
+[mat-dialog-title] {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+// customize dialog content text
+[mat-dialog-content] {
+  p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #4b5563;
+    margin: 0;
+  }
+}
+
+// responsive sizing for mobile
+@media (max-width: 480px) {
+  [mat-dialog-title] {
+    font-size: 1.25rem;
+  }
+
+  [mat-dialog-content] p {
+    font-size: 0.9375rem;
+  }
+}

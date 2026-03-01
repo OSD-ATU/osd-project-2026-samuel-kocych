@@ -1,0 +1,133 @@
+<div class="container">
+  <!-- form title -->
+  <h1 class="form-title">
+    {{ isEditMode ? "Edit Recipe" : "Create New Recipe" }}
+  </h1>
+
+  <!-- form card -->
+  <mat-card>
+    <mat-card-content>
+      <form
+        [formGroup]="recipeForm"
+        (ngSubmit)="onSubmit()"
+        class="recipe-form"
+      >
+        <!-- title field -->
+        <mat-form-field appearance="outline">
+          <mat-label>Recipe Title</mat-label>
+          <mat-icon matPrefix>restaurant_menu</mat-icon>
+          <input matInput formControlName="title" autocomplete="off" />
+          @if (title?.hasError("required")) {
+            <mat-error>Title is required</mat-error>
+          } @else if (title?.hasError("minlength")) {
+            <mat-error>Title must be at least 3 characters</mat-error>
+          }
+          <mat-hint>Must be at least 3 characters</mat-hint>
+        </mat-form-field>
+
+        <!-- image url field (optional) -->
+        <mat-form-field appearance="outline">
+          <mat-label>Image URL (optional)</mat-label>
+          <mat-icon matPrefix>image</mat-icon>
+          <input matInput formControlName="image" autocomplete="off" />
+          <mat-hint>Paste a direct link to an image</mat-hint>
+        </mat-form-field>
+
+        <!-- ingredients section -->
+        <div formArrayName="ingredients">
+          <h3 class="section-label">Ingredients</h3>
+
+          @for (
+            ingredient of ingredients.controls;
+            track $index;
+            let i = $index
+          ) {
+            <div class="ingredient-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Ingredient {{ i + 1 }}</mat-label>
+                <mat-icon matPrefix>check_circle_outline</mat-icon>
+                <input matInput [formControlName]="i" autocomplete="off" />
+                @if (ingredient.touched && ingredient.hasError("required")) {
+                  <mat-error>Ingredient is required</mat-error>
+                }
+              </mat-form-field>
+              <button
+                mat-icon-button
+                color="warn"
+                type="button"
+                (click)="removeIngredient(i)"
+                [disabled]="ingredients.length === 1"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          }
+
+          <button
+            mat-button
+            color="primary"
+            type="button"
+            (click)="addIngredient()"
+          >
+            <mat-icon>add</mat-icon>
+            Add Ingredient
+          </button>
+        </div>
+
+        <!-- instructions section -->
+        <div>
+          <h3 class="section-label">
+            <mat-icon>description</mat-icon>
+            Instructions
+          </h3>
+          <mat-form-field appearance="outline">
+            <mat-label>Cooking Instructions</mat-label>
+            <textarea
+              matInput
+              formControlName="instructions"
+              rows="6"
+            ></textarea>
+            @if (instructions?.hasError("required")) {
+              <mat-error>Instructions are required</mat-error>
+            } @else if (instructions?.hasError("minlength")) {
+              <mat-error>Instructions must be at least 10 characters</mat-error>
+            }
+            <mat-hint
+              >Provide detailed cooking instructions (min 10
+              characters)</mat-hint
+            >
+          </mat-form-field>
+        </div>
+
+        <!-- difficulty field -->
+        <mat-form-field appearance="outline">
+          <mat-label>Difficulty Level</mat-label>
+          <mat-icon matPrefix>flag</mat-icon>
+          <mat-select formControlName="difficulty">
+            <mat-option value="easy">Easy</mat-option>
+            <mat-option value="medium">Medium</mat-option>
+            <mat-option value="hard">Hard</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </form>
+    </mat-card-content>
+
+    <!-- actions -->
+    <mat-card-actions>
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        (click)="onSubmit()"
+        [disabled]="recipeForm.invalid"
+      >
+        <mat-icon>save</mat-icon>
+        {{ isEditMode ? "Update Recipe" : "Create Recipe" }}
+      </button>
+      <button mat-button routerLink="/">
+        <mat-icon>cancel</mat-icon>
+        Cancel
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

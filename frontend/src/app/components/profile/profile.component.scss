@@ -1,0 +1,112 @@
+/* Only keep necessary layout and spacing styles for profile page. Remove button customizations, as Material handles them. */
+.profile-wide-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100vw;
+  min-height: 80vh;
+  padding-top: 40px;
+}
+
+.profile-avatar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: #f5f5f5;
+  margin-bottom: 32px;
+}
+
+.avatar-icon {
+  font-size: 96px;
+  color: #bdbdbd;
+}
+
+.profile-form-wide {
+  width: 100%;
+  max-width: 600px;
+}
+
+.profile-fields-wide {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-bottom: 32px;
+}
+
+.profile-field-wide {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  position: relative;
+  min-height: 56px;
+}
+
+.field-label {
+  min-width: 100px;
+  font-weight: 500;
+  margin-right: 12px;
+}
+
+.field-value {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.editable-field {
+  cursor: pointer;
+  transition: text-decoration 0.2s;
+}
+.editable-field:hover {
+  text-decoration: underline;
+}
+
+.edit-field {
+  flex: 1;
+  margin-right: 8px;
+}
+
+.profile-actions-wide {
+  width: 100%;
+  margin-top: 24px;
+}
+
+.action-buttons-row {
+  display: flex;
+  width: 100%;
+  gap: 16px;
+}
+
+.action-btn {
+  flex: 1 1 50%;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+}
+
+.save-btn {
+  margin-left: 8px;
+  height: 56px;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  background: #388e3c;
+  color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(56, 142, 60, 0.08);
+}
+
+.action-buttons-row button {
+  background: #1976d2;
+  color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
+}
+
+.action-buttons-row button[color="warn"] {
+  background: #d32f2f;
+  color: #fff;
+}

@@ -1,0 +1,71 @@
+// main container
+.about-container {
+  max-width: 1100px;
+  margin: 50px auto;
+  padding: 20px;
+}
+
+// two-column layout for each section
+.section {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  margin-bottom: 70px;
+
+  // reverse layout for visual variety
+  &.reverse {
+    flex-direction: row-reverse;
+  }
+}
+
+// customize material card for text content
+.text-card {
+  flex: 1;
+  box-shadow: none;
+  background: transparent;
+
+  mat-card-header {
+    padding: 0 0 16px 0;
+
+    mat-card-title {
+      font-size: 1.9rem;
+      font-weight: 600;
+    }
+  }
+
+  mat-card-content {
+    padding: 0;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #374151;
+  }
+}
+
+// image card styling
+.image-card {
+  flex: 1;
+
+  img {
+    height: 400px;
+    object-fit: cover;
+  }
+}
+
+.footer-text {
+  text-align: center;
+  color: #666;
+  margin-top: 40px;
+  font-size: 0.95rem;
+}
+
+// stack sections on mobile
+@media (max-width: 768px) {
+  .section,
+  .section.reverse {
+    flex-direction: column;
+  }
+
+  .image-card img {
+    height: 300px;
+  }
+}

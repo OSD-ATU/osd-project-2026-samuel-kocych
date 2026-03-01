@@ -1,0 +1,97 @@
+<mat-toolbar>
+  <!-- logo and title -->
+  <span class="brand" routerLink="/">
+    <mat-icon>restaurant_menu</mat-icon>
+    Recipe App
+  </span>
+
+  <span style="flex: 1"></span>
+
+  <!-- navigation links for desktop -->
+  <div class="desktop-menu">
+    @if (!(isAuthenticated$ | async)) {
+      <a mat-button routerLink="/login">Login</a>
+      <a mat-button routerLink="/register">Register</a>
+    }
+    @if (isAuthenticated$ | async) {
+      <a
+        mat-button
+        routerLink="/"
+        routerLinkActive="mat-accent"
+        [routerLinkActiveOptions]="{ exact: true }"
+        >Search</a
+      >
+
+      <a mat-button routerLink="/about" routerLinkActive="mat-accent">About</a>
+
+      @if (isEditor$ | async) {
+        <a mat-button routerLink="/create" routerLinkActive="mat-accent"
+          >Create</a
+        >
+      }
+
+      <a mat-button routerLink="/favourites" routerLinkActive="mat-accent"
+        >Favourites</a
+      >
+      <a
+        mat-icon-button
+        routerLink="/profile"
+        routerLinkActive="mat-accent"
+        class="profile-icon-link"
+        style="vertical-align: middle; margin-top: 4px"
+      >
+        <mat-icon style="font-size: 24px">account_circle</mat-icon>
+      </a>
+    }
+  </div>
+
+  <!-- hamburger menu button for mobile -->
+  <button
+    mat-icon-button
+    class="mobile-menu-button"
+    [matMenuTriggerFor]="mobileMenu"
+  >
+    <mat-icon>menu</mat-icon>
+  </button>
+</mat-toolbar>
+
+<!-- dropdown menu for mobile navigation -->
+<mat-menu #mobileMenu="matMenu">
+  @if (!(isAuthenticated$ | async)) {
+    <button mat-menu-item routerLink="/login">Login</button>
+    <button mat-menu-item routerLink="/register">Register</button>
+  }
+
+  @if (isAuthenticated$ | async) {
+    <button
+      mat-menu-item
+      routerLink="/"
+      routerLinkActive="mat-accent"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Search
+    </button>
+
+    <button mat-menu-item routerLink="/about" routerLinkActive="mat-accent">
+      About
+    </button>
+
+    @if (isEditor$ | async) {
+      <button mat-menu-item routerLink="/create" routerLinkActive="mat-accent">
+        Create
+      </button>
+    }
+
+    <button
+      mat-menu-item
+      routerLink="/favourites"
+      routerLinkActive="mat-accent"
+    >
+      Favourites
+    </button>
+
+    <button mat-menu-item routerLink="/profile" routerLinkActive="mat-accent">
+      <mat-icon>account_circle</mat-icon> Profile
+    </button>
+  }
+</mat-menu>

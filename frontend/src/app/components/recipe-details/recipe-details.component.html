@@ -1,0 +1,241 @@
+<!-- main container -->
+<div class="container">
+  @if (recipe$ | async; as recipe) {
+    <!-- header card -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>{{ recipe.title || "Untitled recipe" }}</mat-card-title>
+        <mat-card-subtitle>
+          <mat-chip-set>
+            <mat-chip>
+              <mat-icon matChipAvatar>flag</mat-icon>
+              {{ recipe.difficulty || "not set" | titlecase }}
+            </mat-chip>
+            @if (recipe.dateUpdated || recipe.dateCreated) {
+              <mat-chip>
+                <mat-icon matChipAvatar>schedule</mat-icon>
+                {{ recipe.dateUpdated || recipe.dateCreated | date: "short" }}
+              </mat-chip>
+            }
+          </mat-chip-set>
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <img
+        class="recipe-image"
+        [src]="getRecipeImage(recipe)"
+        [alt]="recipe.title"
+        loading="lazy"
+      />
+
+      <mat-card-actions>
+        <a mat-button routerLink="/">
+          <mat-icon>arrow_back</mat-icon>
+          Back
+        </a>
+
+        @if (isExternal && (isAuthenticated$ | async)) {
+          <button
+            mat-stroked-button
+            color="primary"
+            type="button"
+            (click)="toggleFavorite(recipe._id, 'external', recipe.image)"
+          >
+            <mat-icon>{{
+              isFavorite(recipe._id, "external")
+                ? "favorite"
+                : "favorite_border"
+            }}</mat-icon>
+            {{
+              isFavorite(recipe._id, "external")
+                ? "Remove from favourites"
+                : "Save to favourites"
+            }}
+          </button>
+        }
+
+        @if (!isExternal && (isAuthenticated$ | async)) {
+          <button
+            mat-stroked-button
+            color="primary"
+            type="button"
+            (click)="toggleFavorite(recipe._id, 'internal', recipe.image)"
+          >
+            <mat-icon>{{
+              isFavorite(recipe._id, "internal")
+                ? "favorite"
+                : "favorite_border"
+            }}</mat-icon>
+            {{
+              isFavorite(recipe._id, "internal")
+                ? "Remove from favourites"
+                : "Save to favourites"
+            }}
+          </button>
+        }
+
+        @if (!isExternal && (isEditor$ | async)) {
+          <a
+            mat-raised-button
+            color="primary"
+            [routerLink]="['/edit', recipe._id]"
+          >
+            <mat-icon>edit</mat-icon>
+            Edit
+          </a>
+        }
+        @if (!isExternal && (isEditor$ | async)) {
+          <button mat-raised-button color="warn" (click)="deleteRecipe()">
+            <mat-icon>delete</mat-icon>
+            Delete
+          </button>
+        }
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- ingredients card -->
+    <mat-card>
+      <mat-card-header>
+        <mat-icon matCardAvatar>restaurant</mat-icon>
+        <mat-card-title
+          >Ingredients ({{ recipe.ingredients.length || 0 }})</mat-card-title
+        >
+      </mat-card-header>
+      <mat-card-content>
+        @if (recipe.ingredients.length) {
+          <mat-list>
+            @for (ing of recipe.ingredients; track $index) {
+              <mat-list-item>
+                <mat-icon matListItemIcon>check_circle</mat-icon>
+                <span matListItemTitle>{{ ing }}</span>
+              </mat-list-item>
+              @if ($index < recipe.ingredients.length - 1) {
+                <mat-divider></mat-divider>
+              }
+            }
+          </mat-list>
+        } @else {
+          <mat-card-subtitle>No ingredients listed.</mat-card-subtitle>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- instructions card -->
+    <mat-card>
+      <mat-card-header>
+        <mat-icon matCardAvatar>description</mat-icon>
+        <mat-card-title>Instructions</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p [class.clamp]="!showFull()">
+          {{ recipe.instructions || "No instructions provided." }}
+        </p>
+      </mat-card-content>
+      @if ((recipe.instructions || "").length > 400) {
+        <mat-card-actions align="end">
+          <button mat-button color="primary" (click)="toggleDescription()">
+            {{ showFull() ? "Show less" : "Show more" }}
+          </button>
+        </mat-card-actions>
+      }
+    </mat-card>
+
+    <!-- notes card -->
+    @if (!isExternal) {
+      <mat-card>
+        <mat-card-header>
+          <mat-icon matCardAvatar>comment</mat-icon>
+          <mat-card-title>
+            Notes ({{ recipe.notes?.length || 0 }})
+          </mat-card-title>
+        </mat-card-header>
+
+        @if (isEditor$ | async) {
+          <mat-card-content>
+            <!-- add note form -->
+            <form
+              [formGroup]="commentForm"
+              (ngSubmit)="submitComment()"
+              class="comment-form"
+            >
+              <mat-form-field appearance="outline">
+                <mat-label>Note</mat-label>
+                <mat-icon matPrefix>edit</mat-icon>
+                <textarea
+                  matInput
+                  formControlName="text"
+                  maxlength="300"
+                  rows="3"
+                ></textarea>
+                @if (text?.invalid && text?.touched) {
+                  <mat-error>
+                    @if (text?.hasError("required")) {
+                      Note is required.
+                    }
+                  </mat-error>
+                }
+                <mat-hint align="end"
+                  >{{ text?.value?.length || 0 }}/300</mat-hint
+                >
+              </mat-form-field>
+            </form>
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              (click)="submitComment()"
+              [disabled]="commentForm.invalid || submitting"
+            >
+              <mat-icon>send</mat-icon>
+              Add Note
+            </button>
+          </mat-card-actions>
+        }
+
+        <!-- notes list -->
+        <mat-card-content>
+          @if (recipe.notes && recipe.notes.length) {
+            <mat-list>
+              @for (c of recipe.notes; track c._id) {
+                <mat-list-item>
+                  <mat-icon matListItemAvatar>sticky_note_2</mat-icon>
+                  <span matListItemLine>{{ c.text }}</span>
+                  <span matListItemMeta>{{
+                    c.dateCreated | date: "short"
+                  }}</span>
+                  @if (isEditor$ | async) {
+                    <button
+                      mat-icon-button
+                      matListItemMeta
+                      color="warn"
+                      (click)="c._id && deleteComment(c._id)"
+                      title="Delete note"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  }
+                </mat-list-item>
+                @if ($index < recipe.notes.length - 1) {
+                  <mat-divider></mat-divider>
+                }
+              }
+            </mat-list>
+          } @else {
+            <mat-card-subtitle>No notes yet.</mat-card-subtitle>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+  } @else {
+    <!-- loading spinner -->
+    <div class="loading">
+      <mat-progress-spinner
+        mode="indeterminate"
+        diameter="48"
+      ></mat-progress-spinner>
+    </div>
+  }
+</div>

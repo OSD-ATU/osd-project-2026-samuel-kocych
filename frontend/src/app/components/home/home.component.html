@@ -1,0 +1,30 @@
+<div class="container">
+  <h1 class="page-title">Recipe Finder</h1>
+
+  <div class="mode-buttons" style="margin-bottom: 16px">
+    @if (canAccessPrivate) {
+      <button
+        mat-raised-button
+        color="accent"
+        (click)="setTab('private')"
+        [disabled]="tab === 'private'"
+      >
+        Private recipes
+      </button>
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="setTab('public')"
+        [disabled]="tab === 'public'"
+      >
+        Public recipes
+      </button>
+    }
+  </div>
+
+  @if (tab === "private" && canAccessPrivate) {
+    <app-internal-recipes></app-internal-recipes>
+  } @else {
+    <app-external-recipes></app-external-recipes>
+  }
+</div>

@@ -1,0 +1,20 @@
+@use "../recipe-list/recipe-list.component.scss" as *;
+// Ensure recipe titles are single line with ellipsis
+.single-line-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  max-width: 220px;
+  width: 100%;
+  font-size: 1.1rem;
+}
+
+.mat-card-header .mat-card-title.single-line-ellipsis {
+  max-width: 220px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  vertical-align: middle;
+}

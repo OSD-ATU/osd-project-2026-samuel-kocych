@@ -1,0 +1,226 @@
+<mat-card>
+  <mat-card-content>
+    <form
+      (submit)="onSearch(true); $event.preventDefault()"
+      class="search-form"
+    >
+      <div class="search-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Search recipes</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput [(ngModel)]="searchTerm" name="searchTerm" />
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit">
+          <mat-icon>search</mat-icon>
+          Search
+        </button>
+
+        <button mat-button type="button" (click)="showFilters = !showFilters">
+          <mat-icon>{{ showFilters ? "expand_less" : "expand_more" }}</mat-icon>
+          {{ showFilters ? "Hide" : "Show" }} Filters
+        </button>
+      </div>
+
+      @if (showFilters) {
+        <div class="filters-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Ingredient</mat-label>
+            <mat-icon matPrefix>restaurant</mat-icon>
+            <input matInput [(ngModel)]="ingredient" name="ingredient" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Difficulty</mat-label>
+            <mat-icon matPrefix>flag</mat-icon>
+            <mat-select [(ngModel)]="difficulty" name="difficulty">
+              <mat-option value="">All</mat-option>
+              <mat-option value="easy">Easy</mat-option>
+              <mat-option value="medium">Medium</mat-option>
+              <mat-option value="hard">Hard</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Sort by</mat-label>
+            <mat-icon matPrefix>sort</mat-icon>
+            <mat-select [(ngModel)]="sortField" name="sortField">
+              <mat-option value="dateUpdated">Date Updated</mat-option>
+              <mat-option value="dateCreated">Date Created</mat-option>
+              <mat-option value="title">Title</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Order</mat-label>
+            <mat-icon matPrefix>swap_vert</mat-icon>
+            <mat-select [(ngModel)]="sortOrder" name="sortOrder">
+              <mat-option value="desc">Newest First</mat-option>
+              <mat-option value="asc">Oldest First</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      }
+    </form>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="stats-card">
+  <mat-card-content class="stats-content">
+    <div class="stat">
+      <mat-icon>countertops</mat-icon>
+      Total recipes: {{ totalRecipes ?? "…" }}
+    </div>
+    <button
+      mat-stroked-button
+      color="primary"
+      (click)="loadRandom()"
+      [disabled]="loadingRandom"
+    >
+      <mat-icon>shuffle</mat-icon>
+      {{ loadingRandom ? "Loading…" : "Random Recipe" }}
+    </button>
+  </mat-card-content>
+</mat-card>
+
+@if (recipesData$ | async; as data) {
+  <div class="grid">
+    @if (randomRecipe) {
+      <mat-card
+        class="recipe-card random-full"
+        (click)="goToDetails(randomRecipe._id)"
+      >
+        @if (isAuthenticated$ | async) {
+          <button
+            mat-icon-button
+            class="fav-btn"
+            type="button"
+            (click)="
+              $event.stopPropagation();
+              toggleFavorite(randomRecipe._id, randomRecipe.image)
+            "
+            [title]="
+              isFavorite(randomRecipe._id)
+                ? 'Remove from favourites'
+                : 'Save to favourites'
+            "
+          >
+            <mat-icon>{{
+              isFavorite(randomRecipe._id) ? "favorite" : "favorite_border"
+            }}</mat-icon>
+          </button>
+        }
+        <img
+          class="recipe-image"
+          [src]="getRecipeImage(randomRecipe)"
+          [alt]="randomRecipe.title"
+          loading="lazy"
+        />
+        <mat-card-header>
+          <mat-card-title>{{
+            randomRecipe.title || "Untitled recipe"
+          }}</mat-card-title>
+          <mat-card-subtitle>Random recipe</mat-card-subtitle>
+        </mat-card-header>
+      </mat-card>
+    }
+
+    @for (recipe of data.recipes; track recipe._id) {
+      <mat-card class="recipe-card" (click)="goToDetails(recipe._id)">
+        @if (isAuthenticated$ | async) {
+          <button
+            mat-icon-button
+            class="fav-btn"
+            type="button"
+            (click)="
+              $event.stopPropagation(); toggleFavorite(recipe._id, recipe.image)
+            "
+            [title]="
+              isFavorite(recipe._id)
+                ? 'Remove from favourites'
+                : 'Save to favourites'
+            "
+          >
+            <mat-icon>{{
+              isFavorite(recipe._id) ? "favorite" : "favorite_border"
+            }}</mat-icon>
+          </button>
+        }
+        <img
+          class="recipe-image"
+          [src]="getRecipeImage(recipe)"
+          [alt]="recipe.title"
+          loading="lazy"
+        />
+        <mat-card-header>
+          <mat-card-title>{{
+            recipe.title || "Untitled recipe"
+          }}</mat-card-title>
+          <mat-card-subtitle>
+            <mat-chip-set>
+              <mat-chip>
+                <mat-icon matChipAvatar>flag</mat-icon>
+                {{ recipe.difficulty || "not set" | titlecase }}
+              </mat-chip>
+            </mat-chip-set>
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-list>
+            <mat-list-item>
+              <mat-icon matListItemIcon>list</mat-icon>
+              <span matListItemTitle
+                >{{ recipe.ingredients.length || 0 }} ingredients</span
+              >
+            </mat-list-item>
+            <mat-list-item>
+              <mat-icon matListItemIcon>schedule</mat-icon>
+              <span matListItemTitle>
+                {{
+                  recipe.dateUpdated || recipe.dateCreated | date: "mediumDate"
+                }}
+              </span>
+            </mat-list-item>
+          </mat-list>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+
+  @if (data.recipes.length === 0) {
+    <mat-card class="empty-card">
+      <mat-card-content>
+        <mat-icon>search_off</mat-icon>
+        <h3>No recipes found</h3>
+        <p>
+          Try a different keyword, ingredient, or difficulty filter to see more
+          results.
+        </p>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (data.totalPages > 1) {
+    <mat-card class="pagination-card">
+      <mat-card-actions>
+        <button
+          mat-stroked-button
+          (click)="getPreviousPage()"
+          [disabled]="data.page <= 1"
+        >
+          Previous
+        </button>
+        <span class="page-info"
+          >Page {{ data.page }} of {{ data.totalPages }}</span
+        >
+        <button
+          mat-stroked-button
+          (click)="getNextPage(data.total)"
+          [disabled]="data.page >= data.totalPages"
+        >
+          Next
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  }
+}

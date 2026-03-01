@@ -1,0 +1,186 @@
+<div class="profile-wide-container">
+  <div class="profile-avatar" style="background-color: gray"></div>
+  <form
+    [formGroup]="profileForm"
+    class="profile-form-wide"
+    (ngSubmit)="onSubmit()"
+  >
+    <div class="profile-fields-wide">
+      <!-- Name -->
+      <div
+        class="profile-field-wide"
+        style="display: flex; align-items: center"
+      >
+        <span class="field-label">Name:</span>
+        <div
+          class="field-value"
+          style="flex: 1; display: flex; align-items: center; gap: 8px"
+        >
+          @if (editingField === "name") {
+            <mat-form-field
+              class="edit-field"
+              appearance="outline"
+              style="flex: 1"
+            >
+              <input matInput formControlName="name" autofocus />
+            </mat-form-field>
+            <button
+              mat-icon-button
+              color="primary"
+              type="button"
+              (click)="saveField('name')"
+            >
+              <mat-icon>check</mat-icon>
+            </button>
+            <button mat-icon-button type="button" (click)="cancelEdit('name')">
+              <mat-icon>close</mat-icon>
+            </button>
+          } @else {
+            <span style="flex: 1">{{ profileForm.get("name")?.value }}</span>
+            <span style="flex: 0 0 auto; margin-left: auto">
+              <button
+                mat-icon-button
+                type="button"
+                (click)="toggleEdit('name')"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+            </span>
+          }
+        </div>
+      </div>
+      <!-- Email -->
+      <div
+        class="profile-field-wide"
+        style="display: flex; align-items: center"
+      >
+        <span class="field-label">Email:</span>
+        <div
+          class="field-value"
+          style="flex: 1; display: flex; align-items: center; gap: 8px"
+        >
+          @if (editingField === "email") {
+            <mat-form-field
+              class="edit-field"
+              appearance="outline"
+              style="flex: 1"
+            >
+              <input matInput formControlName="email" type="email" autofocus />
+            </mat-form-field>
+            <button
+              mat-icon-button
+              color="primary"
+              type="button"
+              (click)="saveField('email')"
+            >
+              <mat-icon>check</mat-icon>
+            </button>
+            <button mat-icon-button type="button" (click)="cancelEdit('email')">
+              <mat-icon>close</mat-icon>
+            </button>
+          } @else {
+            <span style="flex: 1">{{ profileForm.get("email")?.value }}</span>
+            <span style="flex: 0 0 auto; margin-left: auto">
+              <button
+                mat-icon-button
+                type="button"
+                (click)="toggleEdit('email')"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+            </span>
+          }
+        </div>
+      </div>
+      <!-- Password -->
+      <div
+        class="profile-field-wide"
+        style="display: flex; align-items: center"
+      >
+        <span class="field-label">Password:</span>
+        <div
+          class="field-value"
+          style="flex: 1; display: flex; align-items: center; gap: 8px"
+        >
+          @if (editingField === "password") {
+            <mat-form-field
+              class="edit-field"
+              appearance="outline"
+              style="flex: 1"
+            >
+              <input
+                matInput
+                [type]="hide ? 'password' : 'text'"
+                formControlName="password"
+                autocomplete="new-password"
+                autofocus
+              />
+              <button
+                mat-icon-button
+                matSuffix
+                type="button"
+                (click)="hide = !hide"
+              >
+                <mat-icon>{{
+                  hide ? "visibility" : "visibility_off"
+                }}</mat-icon>
+              </button>
+            </mat-form-field>
+            <button
+              mat-icon-button
+              color="primary"
+              type="button"
+              (click)="saveField('password')"
+            >
+              <mat-icon>check</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              type="button"
+              (click)="cancelEdit('password')"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          } @else {
+            <span style="flex: 1">****</span>
+            <span style="flex: 0 0 auto; margin-left: auto">
+              <button
+                mat-icon-button
+                type="button"
+                (click)="toggleEdit('password')"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+            </span>
+          }
+        </div>
+      </div>
+    </div>
+    <div class="profile-actions-wide">
+      <div class="action-buttons-row" style="display: flex">
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          (click)="onLogout()"
+          class="mat-elevation-z2"
+          style="width: 50%"
+        >
+          <mat-icon>logout</mat-icon>
+          Logout
+        </button>
+        <button
+          mat-raised-button
+          color="warn"
+          type="button"
+          (click)="onDeleteAccount()"
+          class="mat-elevation-z2"
+          style="width: 50%"
+        >
+          <mat-icon>delete</mat-icon>
+          Delete Account
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

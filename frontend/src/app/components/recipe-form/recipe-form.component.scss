@@ -1,0 +1,78 @@
+// container layout
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+// form title
+.form-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0px;
+  color: #1a1a1a;
+  text-align: center;
+}
+
+// card appearance
+mat-card {
+  padding: 12px !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+// form layout
+.recipe-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+// section label
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 16px 0 12px 0;
+  color: #1a1a1a;
+
+  mat-icon {
+    font-size: 20px;
+  }
+}
+
+// ingredient row
+.ingredient-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  mat-form-field {
+    flex: 1;
+  }
+
+  button {
+    margin-top: 8px;
+  }
+}
+
+// actions spacing
+mat-card-actions {
+  padding: 16px 12px 12px 12px !important;
+  gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+// validation styling
+.recipe-form input.ng-invalid.ng-touched,
+.recipe-form textarea.ng-invalid.ng-touched {
+  background-color: #ffe4e6;
+}

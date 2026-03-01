@@ -1,0 +1,65 @@
+<div class="container">
+  <h1 class="page-title">Favourites</h1>
+
+  @if (favoritesData$ | async; as data) {
+    @if (data.items.length === 0) {
+      <mat-card class="empty-card">
+        <mat-card-content>
+          <mat-icon>favorite_border</mat-icon>
+          <p>No favourite recipes yet.</p>
+          <a
+            mat-raised-button
+            color="primary"
+            routerLink="/"
+            [queryParams]="{ tab: 'public' }"
+            >Browse public recipes</a
+          >
+        </mat-card-content>
+      </mat-card>
+    } @else {
+      <mat-card class="stats-card">
+        <mat-card-content class="stats-content">
+          <div class="stat">
+            <mat-icon>favorite</mat-icon>
+            <p>Saved recipes: {{ data.cards.length }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <div class="grid">
+        @for (card of data.cards; track card.item.source + ":" + card.item.id) {
+          <mat-card class="recipe-card" (click)="goToDetails(card.item)">
+            <img
+              class="recipe-image"
+              [src]="getRecipeImage(card)"
+              [alt]="card.recipe.title"
+              loading="lazy"
+            />
+            <mat-card-header>
+              <mat-card-title class="single-line-ellipsis">{{
+                card.recipe.title || "Untitled recipe"
+              }}</mat-card-title>
+              <mat-card-subtitle>
+                {{
+                  card.item.source === "internal"
+                    ? "Private recipe"
+                    : "Public recipe"
+                }}
+              </mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <button
+                mat-stroked-button
+                color="warn"
+                (click)="$event.stopPropagation(); remove(card.item)"
+              >
+                <mat-icon>delete</mat-icon>
+                Remove
+              </button>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    }
+  }
+</div>

@@ -1,0 +1,37 @@
+// black navbar styling
+mat-toolbar {
+  --mat-toolbar-standard-height: 72px;
+  background: #111;
+  color: #fff;
+}
+
+// brand logo and title
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #fff;
+}
+
+// navigation buttons white text
+.desktop-menu a {
+  color: #fff;
+  margin-right: 20px;
+}
+
+// hide mobile menu by default
+.mobile-menu-button {
+  display: none;
+}
+
+// responsive layout
+@media (max-width: 768px) {
+  .desktop-menu {
+    display: none;
+  }
+
+  .mobile-menu-button {
+    display: inline-flex;
+  }
+}

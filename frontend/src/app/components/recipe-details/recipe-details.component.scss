@@ -1,0 +1,102 @@
+// container layout
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+// card spacing and appearance
+mat-card {
+  margin-bottom: 16px;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+// header alignment and tighter avatar gap
+mat-card-header {
+  align-items: center;
+}
+
+mat-card-header .mat-mdc-card-avatar {
+  margin-right: 8px; /* reduce default gap */
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+mat-card-header .mat-mdc-card-avatar .mat-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+mat-card-title {
+  margin-bottom: 8px;
+}
+
+.recipe-image {
+  width: 100%;
+  max-height: 360px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin: 12px 0;
+  background: #f3f4f6;
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0px;
+  color: #1a1a1a;
+  text-align: center;
+}
+
+// button spacing
+mat-card-actions {
+  padding: 8px 16px !important;
+  gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+// comment form layout
+.comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// instruction text clamp
+.clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// loading center
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+// list icons alignment and consistent spacing
+.mat-mdc-list-item .mat-icon[matListItemIcon],
+.mat-mdc-list-item .mat-icon[matListItemAvatar] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: 24px;
+  line-height: 1;
+}
+
+// validation styling
+.comment-form input.ng-invalid.ng-touched,
+.comment-form textarea.ng-invalid.ng-touched {
+  background-color: #ffe4e6;
+}
