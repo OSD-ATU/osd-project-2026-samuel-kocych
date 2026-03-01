@@ -42,6 +42,9 @@
                 <div class="user-name">
                   <mat-icon class="user-icon">person</mat-icon>
                   <span>{{ user.name }}</span>
+                  @if (isCurrentUser(user._id)) {
+                    <mat-chip color="accent" class="me-chip">Me</mat-chip>
+                  }
                 </div>
               </td>
             </ng-container>
