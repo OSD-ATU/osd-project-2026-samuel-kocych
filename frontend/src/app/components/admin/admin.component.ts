@@ -54,6 +54,7 @@ export class AdminComponent implements OnInit {
     this.adminService.getAllUsers().subscribe({
       next: (res) => {
         this.users = res.users;
+        this.loading = false;
         this.showSnackBar('Users loaded successfully', 'success');
       },
       error: (err) => {
