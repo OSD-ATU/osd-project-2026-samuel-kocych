@@ -1,31 +1,29 @@
-import { Component, inject, signal } from '@angular/core';
-import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { switchMap, catchError, of, BehaviorSubject } from 'rxjs';
-import { InternalRecipeService } from '../../services/internal-recipe.service';
-import { ExternalRecipeService } from '../../services/external-recipe.service';
-import { Recipe } from '../../interfaces/recipe.interface';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatListModule } from '@angular/material/list';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.component';
-import { AuthCustomService } from '../../services/auth-custom.service';
-import {
-  FavoriteSource,
-  FavoritesService,
-} from '../../services/favorites.service';
+import { Component, inject, signal } from "@angular/core";
+import { FormBuilder, Validators, ReactiveFormsModule } from "@angular/forms";
+import { CommonModule } from "@angular/common";
+import { ActivatedRoute, Router, RouterModule } from "@angular/router";
+import { switchMap, catchError, of, BehaviorSubject } from "rxjs";
+import { InternalRecipeService } from "../../services/internal-recipe.service";
+import { ExternalRecipeService } from "../../services/external-recipe.service";
+import { Recipe } from "../../interfaces/recipe.interface";
+import { MatCardModule } from "@angular/material/card";
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
+import { MatListModule } from "@angular/material/list";
+import { MatDividerModule } from "@angular/material/divider";
+import { MatChipsModule } from "@angular/material/chips";
+import { MatDialog } from "@angular/material/dialog";
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { ConfirmDialogComponent } from "../shared/confirm-dialog/confirm-dialog.component";
+import { AuthCustomService } from "../../services/auth-custom.service";
+import { FavoritesService } from "../../services/favorites.service";
+import type { FavoriteItem } from "../../interfaces/user.interface";
 
 @Component({
-  selector: 'app-recipe-details',
+  selector: "app-recipe-details",
   standalone: true,
   imports: [
     CommonModule,
@@ -41,8 +39,8 @@ import {
     MatDividerModule,
     MatChipsModule,
   ],
-  templateUrl: './recipe-details.component.html',
-  styleUrls: ['./recipe-details.component.scss'],
+  templateUrl: "./recipe-details.component.html",
+  styleUrls: ["./recipe-details.component.scss"],
 })
 export class RecipeDetailsComponent {
   // services
@@ -57,10 +55,10 @@ export class RecipeDetailsComponent {
   // state
   showFull = signal(false);
   submitting = false;
-  recipeId = '';
+  recipeId = "";
   isExternal = false;
 
-  readonly placeholderImageUrl = 'https://placehold.co/900x600?text=Recipe';
+  readonly placeholderImageUrl = "https://placehold.co/900x600?text=Recipe";
   private reloadSubject = new BehaviorSubject<void>(undefined);
   private authService = inject(AuthCustomService);
   isAuthenticated$ = this.authService.isAuthenticated$;
@@ -70,8 +68,8 @@ export class RecipeDetailsComponent {
   // recipe stream by id
   recipe$ = this.route.paramMap.pipe(
     switchMap((params) => {
-      this.recipeId = params.get('id') ?? '';
-      this.isExternal = this.route.snapshot.data?.['source'] === 'external';
+      this.recipeId = params.get("id") ?? "";
+      this.isExternal = this.route.snapshot.data?.["source"] === "external";
       return this.reloadSubject.pipe(
         switchMap(() =>
           this.isExternal
@@ -85,11 +83,11 @@ export class RecipeDetailsComponent {
 
   // note form
   commentForm = inject(FormBuilder).group({
-    text: ['', [Validators.required, Validators.maxLength(300)]],
+    text: ["", [Validators.required, Validators.maxLength(300)]],
   });
 
   get text() {
-    return this.commentForm.get('text');
+    return this.commentForm.get("text");
   }
 
   // toggle full instructions
@@ -110,11 +108,11 @@ export class RecipeDetailsComponent {
           this.commentForm.reset();
           this.submitting = false;
           this.reloadSubject.next();
-          this.showSnackBar('Note added successfully', 'success');
+          this.showSnackBar("Note added successfully", "success");
         },
         error: (err: Error) => {
           this.submitting = false;
-          this.showSnackBar('Failed to add note: ' + err.message, 'error');
+          this.showSnackBar("Failed to add note: " + err.message, "error");
         },
       });
   }
@@ -123,10 +121,10 @@ export class RecipeDetailsComponent {
   deleteComment(commentId: string): void {
     if (this.isExternal) return;
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
+      width: "400px",
       data: {
-        title: 'Delete Note',
-        message: 'Are you sure you want to delete this note?',
+        title: "Delete Note",
+        message: "Are you sure you want to delete this note?",
       },
     });
 
@@ -135,10 +133,10 @@ export class RecipeDetailsComponent {
         this.internalService.deleteComment(this.recipeId, commentId).subscribe({
           next: () => {
             this.reloadSubject.next();
-            this.showSnackBar('Note deleted', 'success');
+            this.showSnackBar("Note deleted", "success");
           },
           error: (err: Error) =>
-            this.showSnackBar('Failed to delete note: ' + err.message, 'error'),
+            this.showSnackBar("Failed to delete note: " + err.message, "error"),
         });
       }
     });
@@ -148,10 +146,10 @@ export class RecipeDetailsComponent {
   deleteRecipe(): void {
     if (this.isExternal) return;
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '450px',
+      width: "450px",
       data: {
-        title: 'Delete Recipe',
-        message: 'Are you sure you want to delete this recipe?',
+        title: "Delete Recipe",
+        message: "Are you sure you want to delete this recipe?",
       },
     });
 
@@ -159,13 +157,13 @@ export class RecipeDetailsComponent {
       if (confirmed && this.recipeId) {
         this.internalService.deleteRecipe(this.recipeId).subscribe({
           next: () => {
-            this.showSnackBar('Recipe deleted', 'success');
-            this.router.navigateByUrl('/');
+            this.showSnackBar("Recipe deleted", "success");
+            this.router.navigateByUrl("/");
           },
           error: (err: Error) =>
             this.showSnackBar(
-              'Failed to delete recipe: ' + err.message,
-              'error',
+              "Failed to delete recipe: " + err.message,
+              "error",
             ),
         });
       }
@@ -173,12 +171,12 @@ export class RecipeDetailsComponent {
   }
 
   // show snackbar notification
-  private showSnackBar(message: string, type: 'success' | 'error'): void {
-    this.snackBar.open(message, type === 'success' ? 'OK' : 'Dismiss', {
-      duration: type === 'success' ? 4000 : 15000,
+  private showSnackBar(message: string, type: "success" | "error"): void {
+    this.snackBar.open(message, type === "success" ? "OK" : "Dismiss", {
+      duration: type === "success" ? 4000 : 15000,
       panelClass: [`${type}-snackbar`],
-      horizontalPosition: 'end',
-      verticalPosition: 'bottom',
+      horizontalPosition: "end",
+      verticalPosition: "bottom",
     });
   }
 
@@ -187,13 +185,16 @@ export class RecipeDetailsComponent {
     return recipe.image || this.placeholderImageUrl;
   }
 
-  isFavorite(id?: string, source: FavoriteSource = 'external'): boolean {
+  isFavorite(
+    id?: string,
+    source: "external" | "internal" = "external",
+  ): boolean {
     return this.favorites.isFavorite(id, source);
   }
 
   toggleFavorite(
     id?: string,
-    source: FavoriteSource = 'external',
+    source: "external" | "internal" = "external",
     image?: string,
   ): void {
     this.favorites.toggle(id, source, image);

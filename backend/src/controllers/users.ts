@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { ObjectId } from "mongodb";
 import { collections } from "../database";
-import { FavoriteItem, User } from "../models/user";
+import { User } from "../models/user";
+import { FavoriteItem } from "../models/favorite";
 import { Recipe } from "../models/recipe";
 import * as argon2 from "argon2";
 
