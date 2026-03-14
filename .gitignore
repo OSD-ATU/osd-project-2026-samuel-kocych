@@ -23,7 +23,6 @@ yarn-error.log*
 # =========================
 *.env
 **/.env
-**/environments/
 
 # =========================
 # OS files
