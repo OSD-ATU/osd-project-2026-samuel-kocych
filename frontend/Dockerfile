@@ -7,9 +7,6 @@ RUN npm run build -- --configuration production
 
 # Runtime stage
 FROM nginx:alpine
-# Odstranit defaultní nginx obsah
 RUN rm -rf /usr/share/nginx/html/*
-# Zkopírovat produkční build Angularu
-COPY --from=build /app/dist/recipe-app /usr/share/nginx/html
-# Spustit nginx na foreground (Render vyžaduje, aby process běžel)
+COPY --from=build /app/dist/recipe-app/browser /usr/share/nginx/html
 CMD ["nginx", "-g", "daemon off;"]
