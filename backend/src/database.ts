@@ -7,16 +7,16 @@ dotenv.config();
 
 const connectionString: string = process.env.DB_CONN_STRING || "";
 const dbName: string = process.env.DB_NAME || "recipe-app";
+if (connectionString === "") {
+  throw new Error("No connection string in .env file");
+}
+
 const client = new MongoClient(connectionString);
 
 export const collections: {
   recipes?: Collection<Recipe>;
   users?: Collection<User>;
 } = {};
-
-if (connectionString == "") {
-  throw new Error("No connection string in .env file");
-}
 
 let db: Db;
 

@@ -5,7 +5,8 @@
     "outDir": "./build",
     "rootDir": ".",
     "strict": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
   "include": ["src/**/*", "tests/**/*", "tests", "server.ts"]
 }

@@ -11,6 +11,13 @@ import { validJWTProvided } from "./middleware/auth.middleware";
 dotenv.config();
 
 const PORT = process.env.PORT || 3001;
+const allowedOrigins = (
+  process.env.CORS_ORIGINS ||
+  "http://localhost:4200,http://localhost:4201,https://osd-project-2026-samuel-kocych.onrender.com"
+)
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 const app: Application = express();
 
@@ -19,7 +26,14 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: "http://localhost:4200",
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error("Origin not allowed by CORS"));
+    },
     credentials: true,
   }),
 );
