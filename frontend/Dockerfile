@@ -1,6 +1,6 @@
 # line 3 initialises build stage and sets base image called build
 # using node here as base image
-FROM node:22.8-alpine AS build
+FROM node:22.13.1-alpine AS build
 
 
 # line 8 -if directory does not exist, WORKDIR creates it
