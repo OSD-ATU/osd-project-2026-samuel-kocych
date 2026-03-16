@@ -3,7 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { User } from '../interfaces/user.interface';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environment.development';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -89,7 +89,7 @@ export class AuthCustomService {
   }
 
   register(name: string, email: string, password: string, role: any) {
-    return this.http.post('http://localhost:3000/api/v1/auth/register', {
+    return this.http.post(`${environment.apiUri}/auth/register`, {
       name,
       email,
       password,

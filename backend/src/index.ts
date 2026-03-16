@@ -13,7 +13,7 @@ dotenv.config();
 const PORT = process.env.PORT || 3001;
 const allowedOrigins = (
   process.env.CORS_ORIGINS ||
-  "http://localhost:4200,http://localhost:4201,https://osd-project-2026-samuel-kocych.onrender.com"
+  "http://localhost:4200,http://localhost:4201,http://localhost:90,https://osd-project-2026-samuel-kocych.onrender.com"
 )
   .split(",")
   .map((origin) => origin.trim())

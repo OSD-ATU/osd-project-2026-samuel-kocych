@@ -3,7 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { BehaviorSubject, of } from "rxjs";
 import { map } from "rxjs/operators";
 import { AuthCustomService } from "./auth-custom.service";
-import { environment } from "../../environments/environment.development";
+import { environment } from "../../environments/environment";
 import { FavoriteItem } from "../interfaces/user.interface";
 
 @Injectable({
