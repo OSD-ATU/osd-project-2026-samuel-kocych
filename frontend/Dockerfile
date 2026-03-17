@@ -16,3 +16,5 @@ RUN npm run build -- --configuration production
 FROM nginx:alpine
 # line 18 copy the buit application to the nginx root dir at /html
 COPY --from=build /app/dist/recipe-app/browser /usr/share/nginx/html
+# use custom nginx config with angular spa fallback routing
+COPY nginx.conf /etc/nginx/conf.d/default.conf
