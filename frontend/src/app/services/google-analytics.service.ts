@@ -20,29 +20,9 @@ declare global {
 })
 export class GoogleAnalyticsService {
   private router = inject(Router);
-  private gaId = inject(GA_MEASUREMENT_ID);
 
   constructor() {
-    this.loadScript();
     this.trackPageViews();
-  }
-
-  // dynamically load gtag script and initialize dataLayer
-  private loadScript(): void {
-    const script = document.createElement("script");
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${this.gaId}`;
-    document.head.appendChild(script);
-
-    window.dataLayer = window.dataLayer || [];
-    function gtag(...args: any[]): void {
-      window.dataLayer.push(args);
-    }
-    window.gtag = gtag;
-    (window.gtag as any)("js", new Date());
-    (window.gtag as any)("config", this.gaId, {
-      page_path: window.location.pathname,
-    });
   }
 
   // send page_view event on every route change
