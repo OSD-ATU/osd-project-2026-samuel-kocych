@@ -1,11 +1,6 @@
-import { Injectable, inject, InjectionToken } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Router, NavigationEnd } from "@angular/router";
 import { filter } from "rxjs";
-
-// injection token for the ga measurement id string
-export const GA_MEASUREMENT_ID = new InjectionToken<string>(
-  "ga.measurement.id",
-);
 
 // extend window type to include gtag
 declare global {
