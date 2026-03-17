@@ -2,7 +2,7 @@ import { Component, inject, signal } from "@angular/core";
 import { FormBuilder, Validators, ReactiveFormsModule } from "@angular/forms";
 import { CommonModule } from "@angular/common";
 import { ActivatedRoute, Router, RouterModule } from "@angular/router";
-import { switchMap, catchError, of, BehaviorSubject } from "rxjs";
+import { switchMap, catchError, of, BehaviorSubject, tap } from "rxjs";
 import { InternalRecipeService } from "../../services/internal-recipe.service";
 import { ExternalRecipeService } from "../../services/external-recipe.service";
 import { Recipe } from "../../interfaces/recipe.interface";
@@ -21,6 +21,7 @@ import { ConfirmDialogComponent } from "../shared/confirm-dialog/confirm-dialog.
 import { AuthCustomService } from "../../services/auth-custom.service";
 import { FavoritesService } from "../../services/favorites.service";
 import type { FavoriteItem } from "../../interfaces/user.interface";
+import { GoogleAnalyticsService } from "../../services/google-analytics.service";
 
 @Component({
   selector: "app-recipe-details",
@@ -51,6 +52,7 @@ export class RecipeDetailsComponent {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
   private favorites = inject(FavoritesService);
+  private ga = inject(GoogleAnalyticsService);
 
   // state
   showFull = signal(false);
@@ -76,6 +78,14 @@ export class RecipeDetailsComponent {
             ? this.externalService.getRecipeById(this.recipeId)
             : this.internalService.getRecipeById(this.recipeId),
         ),
+        tap((recipe) => {
+          if (!recipe?._id) return;
+          this.ga.trackViewItem({
+            id: recipe._id,
+            name: recipe.title,
+            source: this.isExternal ? "external" : "internal",
+          });
+        }),
         catchError(() => of(null as unknown as Recipe)),
       );
     }),

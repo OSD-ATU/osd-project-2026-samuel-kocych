@@ -1,8 +1,8 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { Component, inject } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { Router } from "@angular/router";
+import { BehaviorSubject, Observable, of } from "rxjs";
+import { catchError, map, switchMap } from "rxjs/operators";
 import {
   MatCard,
   MatCardActions,
@@ -10,25 +10,26 @@ import {
   MatCardHeader,
   MatCardSubtitle,
   MatCardTitle,
-} from '@angular/material/card';
-import { MatList, MatListItem } from '@angular/material/list';
-import { MatIcon } from '@angular/material/icon';
-import { MatChip, MatChipSet } from '@angular/material/chips';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { FormsModule } from '@angular/forms';
-import { ExternalRecipeService } from '../../services/external-recipe.service';
-import { FavoritesService } from '../../services/favorites.service';
-import { Recipe } from '../../interfaces/recipe.interface';
-import { AuthCustomService } from '../../services/auth-custom.service';
+} from "@angular/material/card";
+import { MatList, MatListItem } from "@angular/material/list";
+import { MatIcon } from "@angular/material/icon";
+import { MatChip, MatChipSet } from "@angular/material/chips";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
+import { MatSelectModule } from "@angular/material/select";
+import { MatButtonModule } from "@angular/material/button";
+import { FormsModule } from "@angular/forms";
+import { ExternalRecipeService } from "../../services/external-recipe.service";
+import { FavoritesService } from "../../services/favorites.service";
+import { Recipe } from "../../interfaces/recipe.interface";
+import { AuthCustomService } from "../../services/auth-custom.service";
+import { GoogleAnalyticsService } from "../../services/google-analytics.service";
 
-type SortField = 'title' | 'dateCreated' | 'dateUpdated';
-type SortOrder = 'asc' | 'desc';
+type SortField = "title" | "dateCreated" | "dateUpdated";
+type SortOrder = "asc" | "desc";
 
 @Component({
-  selector: 'app-external-recipes',
+  selector: "app-external-recipes",
   standalone: true,
   imports: [
     CommonModule,
@@ -49,23 +50,24 @@ type SortOrder = 'asc' | 'desc';
     MatSelectModule,
     MatButtonModule,
   ],
-  templateUrl: './external-recipes.component.html',
-  styleUrls: ['./external-recipes.component.scss'],
+  templateUrl: "./external-recipes.component.html",
+  styleUrls: ["./external-recipes.component.scss"],
 })
 export class ExternalRecipesComponent {
   private externalService = inject(ExternalRecipeService);
   private favorites = inject(FavoritesService);
   private authService = inject(AuthCustomService);
   private router = inject(Router);
+  private ga = inject(GoogleAnalyticsService);
 
   isAuthenticated$ = this.authService.isAuthenticated$;
 
-  searchTerm = '';
-  ingredient = '';
-  category = '';
-  area = '';
-  sortField: SortField = 'title';
-  sortOrder: SortOrder = 'asc';
+  searchTerm = "";
+  ingredient = "";
+  category = "";
+  area = "";
+  sortField: SortField = "title";
+  sortOrder: SortOrder = "asc";
   currentPage = 1;
   pageSize = 10;
   showFilters = false;
@@ -76,7 +78,7 @@ export class ExternalRecipesComponent {
   randomRecipe: Recipe | null = null;
   loadingRandom = false;
 
-  readonly placeholderImageUrl = 'https://placehold.co/600x400?text=Recipe';
+  readonly placeholderImageUrl = "https://placehold.co/600x400?text=Recipe";
 
   private searchTrigger$ = new BehaviorSubject<void>(undefined);
 
@@ -129,14 +131,14 @@ export class ExternalRecipesComponent {
     const area = this.area.trim();
 
     if (ingredient) {
-      this.category = '';
-      this.area = '';
+      this.category = "";
+      this.area = "";
     } else if (category) {
-      this.ingredient = '';
-      this.area = '';
+      this.ingredient = "";
+      this.area = "";
     } else if (area) {
-      this.ingredient = '';
-      this.category = '';
+      this.ingredient = "";
+      this.category = "";
     }
 
     if (isNewSearch) this.currentPage = 1;
@@ -144,6 +146,7 @@ export class ExternalRecipesComponent {
   }
 
   loadRandom(): void {
+    this.ga.trackButtonClick("random_recipe", "external_recipes");
     this.loadingRandom = true;
     this.externalService.getRandomRecipe().subscribe({
       next: (recipe) => {
@@ -178,17 +181,19 @@ export class ExternalRecipesComponent {
     }
   }
 
-  goToDetails(id?: string): void {
+  goToDetails(id?: string, title?: string): void {
     if (!id) return;
-    this.router.navigate(['/public-recipes', id]);
+    this.ga.trackSelectItem({ id, name: title, source: "external" });
+    this.ga.trackBookCoverButtonClick(id, "external", "external_recipes");
+    this.router.navigate(["/public-recipes", id]);
   }
 
   isFavorite(id?: string): boolean {
-    return this.favorites.isFavorite(id, 'external');
+    return this.favorites.isFavorite(id, "external");
   }
 
   toggleFavorite(id?: string, image?: string): void {
-    this.favorites.toggle(id, 'external', image);
+    this.favorites.toggle(id, "external", image);
   }
 
   private applySort(recipes: Recipe[]): Recipe[] {
@@ -196,9 +201,9 @@ export class ExternalRecipesComponent {
     const order = this.sortOrder;
 
     const sorted = [...recipes].sort((a, b) => {
-      if (field === 'title') {
-        const av = (a.title || '').toLowerCase();
-        const bv = (b.title || '').toLowerCase();
+      if (field === "title") {
+        const av = (a.title || "").toLowerCase();
+        const bv = (b.title || "").toLowerCase();
         return av.localeCompare(bv);
       }
 
@@ -211,6 +216,6 @@ export class ExternalRecipesComponent {
       return aDate - bDate;
     });
 
-    return order === 'asc' ? sorted : sorted.reverse();
+    return order === "asc" ? sorted : sorted.reverse();
   }
 }

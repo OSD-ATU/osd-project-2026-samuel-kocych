@@ -1,12 +1,12 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { InternalRecipeService } from '../../services/internal-recipe.service';
-import { Recipe } from '../../interfaces/recipe.interface';
-import { AuthCustomService } from '../../services/auth-custom.service';
-import { FavoritesService } from '../../services/favorites.service';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { Component, inject } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { Router } from "@angular/router";
+import { InternalRecipeService } from "../../services/internal-recipe.service";
+import { Recipe } from "../../interfaces/recipe.interface";
+import { AuthCustomService } from "../../services/auth-custom.service";
+import { FavoritesService } from "../../services/favorites.service";
+import { BehaviorSubject, Observable, of } from "rxjs";
+import { catchError, map, switchMap } from "rxjs/operators";
 import {
   MatCardContent,
   MatCard,
@@ -14,22 +14,23 @@ import {
   MatCardHeader,
   MatCardSubtitle,
   MatCardTitle,
-} from '@angular/material/card';
-import { MatList, MatListItem } from '@angular/material/list';
-import { MatIcon } from '@angular/material/icon';
-import { MatChipSet, MatChip } from '@angular/material/chips';
-import { FormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
+} from "@angular/material/card";
+import { MatList, MatListItem } from "@angular/material/list";
+import { MatIcon } from "@angular/material/icon";
+import { MatChipSet, MatChip } from "@angular/material/chips";
+import { FormsModule } from "@angular/forms";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
+import { MatSelectModule } from "@angular/material/select";
+import { MatButtonModule } from "@angular/material/button";
+import { GoogleAnalyticsService } from "../../services/google-analytics.service";
 
-type SortField = 'title' | 'dateCreated' | 'dateUpdated';
-type SortOrder = 'asc' | 'desc';
-type Difficulty = 'easy' | 'medium' | 'hard';
+type SortField = "title" | "dateCreated" | "dateUpdated";
+type SortOrder = "asc" | "desc";
+type Difficulty = "easy" | "medium" | "hard";
 
 @Component({
-  selector: 'app-internal-recipes',
+  selector: "app-internal-recipes",
   standalone: true,
   imports: [
     CommonModule,
@@ -50,22 +51,23 @@ type Difficulty = 'easy' | 'medium' | 'hard';
     MatChip,
     MatCardTitle,
   ],
-  templateUrl: './recipe-list.component.html',
-  styleUrls: ['./recipe-list.component.scss'],
+  templateUrl: "./recipe-list.component.html",
+  styleUrls: ["./recipe-list.component.scss"],
 })
 export class InternalRecipesComponent {
   private recipeService = inject(InternalRecipeService);
   private router = inject(Router);
   private authService = inject(AuthCustomService);
   private favoritesService = inject(FavoritesService);
+  private ga = inject(GoogleAnalyticsService);
 
   isAuthenticated$ = this.authService.isAuthenticated$;
 
-  searchTerm = '';
-  ingredient = '';
-  difficulty: Difficulty | '' = '';
-  sortField: SortField = 'dateUpdated';
-  sortOrder: SortOrder = 'desc';
+  searchTerm = "";
+  ingredient = "";
+  difficulty: Difficulty | "" = "";
+  sortField: SortField = "dateUpdated";
+  sortOrder: SortOrder = "desc";
   currentPage = 1;
   pageSize = 10;
   showFilters = false;
@@ -74,7 +76,7 @@ export class InternalRecipesComponent {
   randomRecipe: Recipe | null = null;
   loadingRandom = false;
 
-  readonly placeholderImageUrl = 'https://placehold.co/600x400?text=Recipe';
+  readonly placeholderImageUrl = "https://placehold.co/600x400?text=Recipe";
 
   private searchTrigger$ = new BehaviorSubject<void>(undefined);
 
@@ -136,6 +138,7 @@ export class InternalRecipesComponent {
   }
 
   loadRandom(): void {
+    this.ga.trackButtonClick("random_recipe", "internal_recipes");
     this.loadingRandom = true;
     this.recipeService.getRandomRecipe().subscribe({
       next: (recipe) => {
@@ -170,16 +173,18 @@ export class InternalRecipesComponent {
     }
   }
 
-  goToDetails(id?: string): void {
+  goToDetails(id?: string, title?: string): void {
     if (!id) return;
-    this.router.navigate(['/recipes', id]);
+    this.ga.trackSelectItem({ id, name: title, source: "internal" });
+    this.ga.trackBookCoverButtonClick(id, "internal", "internal_recipes");
+    this.router.navigate(["/recipes", id]);
   }
 
   isFavorite(id?: string | null): boolean {
-    return this.favoritesService.isFavorite(id, 'internal');
+    return this.favoritesService.isFavorite(id, "internal");
   }
 
   toggleFavorite(id?: string | null, image?: string | null): void {
-    this.favoritesService.toggle(id, 'internal', image);
+    this.favoritesService.toggle(id, "internal", image);
   }
 }

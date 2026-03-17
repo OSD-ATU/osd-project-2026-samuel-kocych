@@ -88,7 +88,7 @@
     @if (randomRecipe) {
       <mat-card
         class="recipe-card random-full"
-        (click)="goToDetails(randomRecipe._id)"
+        (click)="goToDetails(randomRecipe._id, randomRecipe.title)"
       >
         @if (isAuthenticated$ | async) {
           <button
@@ -126,7 +126,10 @@
     }
 
     @for (recipe of data.recipes; track recipe._id) {
-      <mat-card class="recipe-card" (click)="goToDetails(recipe._id)">
+      <mat-card
+        class="recipe-card"
+        (click)="goToDetails(recipe._id, recipe.title)"
+      >
         @if (isAuthenticated$ | async) {
           <button
             mat-icon-button

@@ -34,6 +34,10 @@ export class AuthCustomService {
       try {
         const user: User = JSON.parse(userJson);
         this.currentUser.set(user);
+        this.ga.setUserProperties({
+          id: user._id,
+          role: user.role ?? null,
+        });
       } catch (err) {
         console.error("Error parsing stored user", err);
         this.currentUser.set(null);
@@ -75,6 +79,10 @@ export class AuthCustomService {
           localStorage.setItem("token", response.token);
           this.currentUser.set(response.user);
           this.isAuthenticated.set(true);
+          this.ga.setUserProperties({
+            id: response.user._id,
+            role: response.user.role ?? null,
+          });
           // track successful login event
           this.ga.trackLogin();
           try {
@@ -108,6 +116,7 @@ export class AuthCustomService {
     localStorage.removeItem("token");
     this.currentUser.set(null);
     this.isAuthenticated.set(false);
+    this.ga.clearUserProperties();
   }
 
   private startAuthenticateTimer(expires: number) {
