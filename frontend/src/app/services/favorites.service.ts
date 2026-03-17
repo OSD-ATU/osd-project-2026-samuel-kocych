@@ -3,6 +3,7 @@ import { toObservable } from "@angular/core/rxjs-interop";
 import { HttpClient } from "@angular/common/http";
 import { of } from "rxjs";
 import { AuthCustomService } from "./auth-custom.service";
+import { GoogleAnalyticsService } from "./google-analytics.service";
 import { environment } from "../../environments/environment";
 import { FavoriteItem } from "../interfaces/user.interface";
 
@@ -12,6 +13,7 @@ import { FavoriteItem } from "../interfaces/user.interface";
 export class FavoritesService {
   private http = inject(HttpClient);
   private readonly authService = inject(AuthCustomService);
+  private ga = inject(GoogleAnalyticsService);
 
   private apiUrl = `${environment.apiUri}/users/me/favorites`;
   private readonly favoritesState = signal<FavoriteItem[]>([]);
@@ -132,6 +134,9 @@ export class FavoritesService {
     ];
     this.favoritesState.set(optimistic);
 
+    // track add favorite event
+    this.ga.trackAddFavorite(trimmed);
+
     this.http
       .post<unknown>(this.apiUrl, { id: trimmed, source, image: nextImage })
       .subscribe({
@@ -151,6 +156,9 @@ export class FavoritesService {
       (x) => !(x.id === trimmed && x.source === source),
     );
     this.favoritesState.set(optimistic);
+
+    // track remove favorite event
+    this.ga.trackRemoveFavorite(trimmed);
 
     const url = `${this.apiUrl}/${encodeURIComponent(source)}/${encodeURIComponent(trimmed)}`;
     this.http.delete<unknown>(url).subscribe({

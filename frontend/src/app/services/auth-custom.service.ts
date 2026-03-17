@@ -4,12 +4,14 @@ import { tap } from "rxjs/operators";
 import { User } from "../interfaces/user.interface";
 import { HttpClient } from "@angular/common/http";
 import { environment } from "../../environments/environment";
+import { GoogleAnalyticsService } from "./google-analytics.service";
 
 @Injectable({
   providedIn: "root",
 })
 export class AuthCustomService {
   private http = inject(HttpClient);
+  private ga = inject(GoogleAnalyticsService);
   readonly currentUser = signal<User | null>(null);
   readonly isAuthenticated = signal(false);
   readonly role = computed(() => this.currentUser()?.role ?? null);
@@ -73,6 +75,8 @@ export class AuthCustomService {
           localStorage.setItem("token", response.token);
           this.currentUser.set(response.user);
           this.isAuthenticated.set(true);
+          // track successful login event
+          this.ga.trackLogin();
           try {
             const payloadBase64 = response.token.split(".")[1];
             if (payloadBase64) {
@@ -86,12 +90,17 @@ export class AuthCustomService {
   }
 
   register(name: string, email: string, password: string, role: any) {
-    return this.http.post(`${environment.apiUri}/auth/register`, {
-      name,
-      email,
-      password,
-      role,
-    });
+    return this.http
+      .post(`${environment.apiUri}/auth/register`, {
+        name,
+        email,
+        password,
+        role,
+      })
+      .pipe(
+        // track successful registration event
+        tap(() => this.ga.trackSignUp()),
+      );
   }
 
   public logout() {
