@@ -1,7 +1,7 @@
-import { Injectable, inject } from "@angular/core";
+import { computed, Injectable, inject, signal } from "@angular/core";
+import { toObservable } from "@angular/core/rxjs-interop";
 import { HttpClient } from "@angular/common/http";
-import { BehaviorSubject, of } from "rxjs";
-import { map } from "rxjs/operators";
+import { of } from "rxjs";
 import { AuthCustomService } from "./auth-custom.service";
 import { environment } from "../../environments/environment";
 import { FavoriteItem } from "../interfaces/user.interface";
@@ -14,35 +14,37 @@ export class FavoritesService {
   private readonly authService = inject(AuthCustomService);
 
   private apiUrl = `${environment.apiUri}/users/me/favorites`;
+  private readonly favoritesState = signal<FavoriteItem[]>([]);
 
-  private readonly favoritesSubject = new BehaviorSubject<FavoriteItem[]>([]);
-
-  readonly favoriteItems$ = this.favoritesSubject.asObservable();
-
-  readonly favoriteExternalIds$ = this.favoriteItems$.pipe(
-    map((items) =>
-      items.filter((x) => x.source === "external").map((x) => x.id),
-    ),
+  readonly favoriteItems = this.favoritesState.asReadonly();
+  readonly favoriteExternalIds = computed(() =>
+    this.favoriteItems()
+      .filter((x) => x.source === "external")
+      .map((x) => x.id),
   );
-
-  readonly favoriteInternalIds$ = this.favoriteItems$.pipe(
-    map((items) =>
-      items.filter((x) => x.source === "internal").map((x) => x.id),
-    ),
+  readonly favoriteInternalIds = computed(() =>
+    this.favoriteItems()
+      .filter((x) => x.source === "internal")
+      .map((x) => x.id),
   );
+  readonly favoriteCount = computed(() => this.favoriteItems().length);
+
+  readonly favoriteItems$ = toObservable(this.favoriteItems);
+  readonly favoriteExternalIds$ = toObservable(this.favoriteExternalIds);
+  readonly favoriteInternalIds$ = toObservable(this.favoriteInternalIds);
 
   constructor() {
     // load favorites from db when the auth state changes
     this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
       if (!isAuthenticated) {
-        this.favoritesSubject.next([]);
+        this.favoritesState.set([]);
         return;
       }
       this.reload();
     });
 
     // initial load if already authenticated (e.g. token restored)
-    if (this.authService.isAuthenticated$.value) {
+    if (this.authService.isAuthenticated()) {
       this.reload();
     }
   }
@@ -51,7 +53,7 @@ export class FavoritesService {
     this.http.get<unknown>(this.apiUrl).subscribe({
       next: (res) => {
         const items = FavoritesService.normalizeResponse(res);
-        this.favoritesSubject.next(items);
+        this.favoritesState.set(items);
       },
       error: () => {
         // keep current list if refresh fails
@@ -60,7 +62,7 @@ export class FavoritesService {
   }
 
   getIdsSnapshot(): string[] {
-    return this.favoritesSubject.value.map((x) => x.id);
+    return this.favoriteItems().map((x) => x.id);
   }
 
   isFavorite(
@@ -69,7 +71,7 @@ export class FavoritesService {
   ): boolean {
     if (!id) return false;
     const trimmed = id.trim();
-    return this.favoritesSubject.value.some(
+    return this.favoriteItems().some(
       (x) => x.id === trimmed && x.source === source,
     );
   }
@@ -80,7 +82,7 @@ export class FavoritesService {
   ): string | undefined {
     const trimmed = (id || "").trim();
     if (!trimmed) return undefined;
-    return this.favoritesSubject.value.find(
+    return this.favoriteItems().find(
       (x) => x.id === trimmed && x.source === source,
     )?.image;
   }
@@ -90,24 +92,24 @@ export class FavoritesService {
     source: "internal" | "external" = "external",
     image?: string | null,
   ): void {
-    if (!this.authService.isAuthenticated$.value) return;
+    if (!this.authService.isAuthenticated()) return;
 
     const trimmed = (id || "").trim();
     if (!trimmed) return;
 
     const nextImage = (image || "").trim() || undefined;
-    const existing = this.favoritesSubject.value.find(
+    const existing = this.favoriteItems().find(
       (x) => x.id === trimmed && x.source === source,
     );
 
     if (existing) {
       if (nextImage && !existing.image) {
-        const optimistic = this.favoritesSubject.value.map((x) =>
+        const optimistic = this.favoriteItems().map((x) =>
           x.id === trimmed && x.source === source
             ? { ...x, image: nextImage }
             : x,
         );
-        this.favoritesSubject.next(optimistic);
+        this.favoritesState.set(optimistic);
 
         this.http
           .post<unknown>(this.apiUrl, {
@@ -115,9 +117,9 @@ export class FavoritesService {
             source,
             image: nextImage,
           })
-          .pipe(map((res) => FavoritesService.normalizeResponse(res)))
           .subscribe({
-            next: (items) => this.favoritesSubject.next(items),
+            next: (res) =>
+              this.favoritesState.set(FavoritesService.normalizeResponse(res)),
             error: () => this.reload(),
           });
       }
@@ -125,39 +127,37 @@ export class FavoritesService {
     }
 
     const optimistic = [
-      ...this.favoritesSubject.value,
+      ...this.favoriteItems(),
       { id: trimmed, source, image: nextImage },
     ];
-    this.favoritesSubject.next(optimistic);
+    this.favoritesState.set(optimistic);
 
     this.http
       .post<unknown>(this.apiUrl, { id: trimmed, source, image: nextImage })
-      .pipe(map((res) => FavoritesService.normalizeResponse(res)))
       .subscribe({
-        next: (items) => this.favoritesSubject.next(items),
+        next: (res) =>
+          this.favoritesState.set(FavoritesService.normalizeResponse(res)),
         error: () => this.reload(),
       });
   }
 
   remove(id: string, source: "internal" | "external" = "external"): void {
-    if (!this.authService.isAuthenticated$.value) return;
+    if (!this.authService.isAuthenticated()) return;
 
     const trimmed = (id || "").trim();
     if (!trimmed) return;
 
-    const optimistic = this.favoritesSubject.value.filter(
+    const optimistic = this.favoriteItems().filter(
       (x) => !(x.id === trimmed && x.source === source),
     );
-    this.favoritesSubject.next(optimistic);
+    this.favoritesState.set(optimistic);
 
     const url = `${this.apiUrl}/${encodeURIComponent(source)}/${encodeURIComponent(trimmed)}`;
-    this.http
-      .delete<unknown>(url)
-      .pipe(map((res) => FavoritesService.normalizeResponse(res)))
-      .subscribe({
-        next: (items) => this.favoritesSubject.next(items),
-        error: () => this.reload(),
-      });
+    this.http.delete<unknown>(url).subscribe({
+      next: (res) =>
+        this.favoritesState.set(FavoritesService.normalizeResponse(res)),
+      error: () => this.reload(),
+    });
   }
 
   toggle(
@@ -168,7 +168,7 @@ export class FavoritesService {
     const trimmed = (id || "").trim();
     if (!trimmed) return;
 
-    if (!this.authService.isAuthenticated$.value) return;
+    if (!this.authService.isAuthenticated()) return;
 
     if (this.isFavorite(trimmed, source)) this.remove(trimmed, source);
     else this.add(trimmed, source, image);

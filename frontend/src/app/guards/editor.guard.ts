@@ -6,13 +6,13 @@ export const editorGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthCustomService);
   const router = inject(Router);
 
-  if (!authService.isAuthenticated$.value) {
+  if (!authService.isAuthenticated()) {
     return router.createUrlTree(["/login"], {
       queryParams: { returnUrl: state.url },
     });
   }
 
-  const role = authService.currentUser$.value?.role;
+  const role = authService.currentUser()?.role;
 
   // editor or admin
   if (role === "editor" || role === "admin") {
