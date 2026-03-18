@@ -1,6 +1,6 @@
 const { MongoClient, ObjectId } = require("mongodb");
 
-const MONGODB_URI = process.env.MONGODB_URI || "";
+const MONGODB_URI = process.env.DB_CONN_STRING || "";
 const DB_NAME = process.env.DB_NAME || "recipe-app";
 
 let cachedDb = null;
@@ -9,7 +9,7 @@ async function connectToDatabase() {
   if (cachedDb) return cachedDb;
 
   if (!MONGODB_URI) {
-    throw new Error("Missing MONGODB_URI environment variable");
+    throw new Error("Missing DB_CONN_STRING environment variable");
   }
 
   const client = await MongoClient.connect(MONGODB_URI);
