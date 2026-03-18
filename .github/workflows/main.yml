@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        lambda: [getUsers, deleteUser, updateUserRole]
+        lambda: [getAllUsers, deleteUser, updateUserRole]
     steps:
       - uses: actions/checkout@v3
 
