@@ -1,0 +1,35 @@
+name: deploy lambdas
+on: [push]
+jobs:
+
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        lambda: [getUsers, deleteUser, updateUserRole]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: |
+          cd backend/lambdas/${{ matrix.lambda }}
+          npm ci
+
+      - name: Zip Lambda
+        run: |
+          cd backend/lambdas/${{ matrix.lambda }}
+          zip -r ../../../${{ matrix.lambda }}.zip .
+
+      - name: Deploy to AWS Lambda
+        uses: appleboy/lambda-action@master
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: eu-west-1
+          function_name: ${{ matrix.lambda }}
+          zip_file: ${{ matrix.lambda }}.zip
