@@ -1,13 +1,17 @@
 const { MongoClient, ObjectId } = require("mongodb");
 
-const MONGODB_URI =
-  "mongodb+srv://skocych:49uEe51zHnphu6vx@cluster0.wnjfr.mongodb.net/";
-const DB_NAME = "recipe-app";
+const MONGODB_URI = process.env.MONGODB_URI || "";
+const DB_NAME = process.env.DB_NAME || "recipe-app";
 
 let cachedDb = null;
 
 async function connectToDatabase() {
   if (cachedDb) return cachedDb;
+
+  if (!MONGODB_URI) {
+    throw new Error("Missing MONGODB_URI environment variable");
+  }
+
   const client = await MongoClient.connect(MONGODB_URI);
   const db = client.db(DB_NAME);
   cachedDb = db;
@@ -44,7 +48,7 @@ exports.handler = async (event, context) => {
     }
 
     const validRoles = ["admin", "editor", ""];
-    if (!role || !validRoles.includes(role)) {
+    if (typeof role !== "string" || !validRoles.includes(role)) {
       return {
         statusCode: 400,
         headers: corsHeaders,
