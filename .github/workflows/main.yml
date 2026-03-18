@@ -27,10 +27,10 @@ jobs:
           cd backend/lambdas/${{ matrix.lambda }}
           npm ci
 
-      - name: Run tests (if present)
+      - name: Run tests
         run: |
           cd backend/lambdas/${{ matrix.lambda }}
-          npm test --if-present
+          npm test
 
   deploy:
     needs: test
