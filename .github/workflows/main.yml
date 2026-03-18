@@ -1,4 +1,5 @@
 name: deploy lambdas
+
 on:
   push:
     branches:
@@ -6,31 +7,56 @@ on:
     paths:
       - backend/lambdas/**
       - .github/workflows/main.yml
+
 jobs:
-  deploy:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         lambda: [getAllUsers, deleteUser, updateUserRole]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
-      - name: Install dependencies
+      - name: Install deps
         run: |
           cd backend/lambdas/${{ matrix.lambda }}
           npm ci
 
-      - name: Zip Lambda
+      - name: Run tests (if present)
+        run: |
+          cd backend/lambdas/${{ matrix.lambda }}
+          npm test --if-present
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        lambda: [getAllUsers, deleteUser, updateUserRole]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: |
+          cd backend/lambdas/${{ matrix.lambda }}
+          npm ci
+
+      - name: Zip lambda
         run: |
           cd backend/lambdas/${{ matrix.lambda }}
           zip -r ../../../${{ matrix.lambda }}.zip .
 
-      - name: Deploy to AWS Lambda
+      - name: Deploy
         uses: appleboy/lambda-action@v0.2.0
         with:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
