@@ -44,4 +44,5 @@ Thumbs.db
 # Angular / TypeScript
 # =========================
 **/.angular/
+**/coverage/
 **/*.tsbuildinfo
