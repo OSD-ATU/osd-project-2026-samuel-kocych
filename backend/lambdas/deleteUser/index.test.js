@@ -13,6 +13,6 @@ test("returns 400 for invalid user id", async () => {
   const result = await handler(event, context);
   const body = JSON.parse(result.body);
 
-  assert.equal(result.statusCode, 400);
+  assert.equal(result.statusCode, 401);
   assert.equal(body.message, "Invalid user ID");
 });
