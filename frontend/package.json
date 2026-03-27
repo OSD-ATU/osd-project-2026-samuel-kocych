@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
+    "test": "ng test --watch --include=src/app/services/admin.service.spec.ts --include=src/app/components/admin/admin.component.spec.ts",
+    "coverage": "ng test --watch=false --code-coverage; open coverage/recipe-app/index.html || open coverage/index.html",
     "build:prod": "ng build --configuration production"
   },
   "private": true,
